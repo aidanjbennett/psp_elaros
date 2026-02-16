@@ -18,5 +18,5 @@ samples, guidance on mobile development, and a full API reference.
 - heart rate /
 - heart rate varaiblity /
 - steps /
-- sleep
+- sleep /
 - sleep zones
