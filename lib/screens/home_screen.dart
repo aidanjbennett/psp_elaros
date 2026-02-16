@@ -12,9 +12,7 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(title: Text("Elaros Health App")),
       bottomNavigationBar: MainNavbar(currentIndex: 0),
       body: SafeArea(
-        child: Column(
-          children: [Text("Hello, World"), StepsWidget(), HeartRateWidget()],
-        ),
+        child: Column(children: [StepsWidget(), HeartRateWidget()]),
       ),
     );
   }
