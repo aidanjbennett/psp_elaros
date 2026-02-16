@@ -12,8 +12,8 @@ class MainNavbar extends StatelessWidget {
           Navigator.pushReplacementNamed(context, '/home');
         }
         break;
-      case 2:
-        if (currentIndex != 2) {
+      case 1:
+        if (currentIndex != 1) {
           Navigator.pushReplacementNamed(context, '/about');
         }
         break;
