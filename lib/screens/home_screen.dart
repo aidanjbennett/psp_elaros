@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:psp_elaros/widgets/heart_rate_widget.dart';
+import 'package:psp_elaros/widgets/hrv_widget.dart';
 import 'package:psp_elaros/widgets/main_navbar_widget.dart';
 import 'package:psp_elaros/widgets/steps_widget.dart';
 
@@ -12,7 +13,9 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(title: Text("Elaros Health App")),
       bottomNavigationBar: MainNavbar(currentIndex: 0),
       body: SafeArea(
-        child: Column(children: [StepsWidget(), HeartRateWidget()]),
+        child: Column(
+          children: [StepsWidget(), HeartRateWidget(), HRVWidget()],
+        ),
       ),
     );
   }

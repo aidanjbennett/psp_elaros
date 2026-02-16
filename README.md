@@ -15,8 +15,8 @@ samples, guidance on mobile development, and a full API reference.
 
 ## Health data for me to collect
 
-- heart rate
-- heart rate varaiblity
-- steps
+- heart rate /
+- heart rate varaiblity /
+- steps /
 - sleep
 - sleep zones
