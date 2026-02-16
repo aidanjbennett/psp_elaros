@@ -3,7 +3,10 @@
     <!-- Required for step counting -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
     <uses-permission android:name="android.permission.health.READ_STEPS"/>
-    
+
+    <!-- Required For Heart Rate -->
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE"/>
+
     <!-- Check whether Health Connect is installed -->
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
