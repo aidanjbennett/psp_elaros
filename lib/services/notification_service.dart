@@ -3,7 +3,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-// ✅ Must be top-level — runs in a separate isolate when app is terminated
+// Must be top-level — runs in a separate
+// isolate when app is terminated
 @pragma('vm:entry-point')
 void onBackgroundNotificationTapped(NotificationResponse response) {
   if (kDebugMode) {
@@ -16,12 +17,12 @@ class NotificationService {
 
   static final _plugin = FlutterLocalNotificationsPlugin();
 
-  // ─── Initialisation ────────────────────────────────────────────────────────
-
+  // Initialisation
   static Future<void> init() async {
     tz.initializeTimeZones();
 
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+
     const iOS = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
@@ -38,8 +39,7 @@ class NotificationService {
     await _requestPermissions();
   }
 
-  // ─── Permissions ───────────────────────────────────────────────────────────
-
+  // Permissions
   static Future<void> _requestPermissions() async {
     await _plugin
         .resolvePlatformSpecificImplementation<
@@ -60,8 +60,7 @@ class NotificationService {
         ?.requestPermissions(alert: true, badge: true, sound: true);
   }
 
-  // ─── Details Builder ───────────────────────────────────────────────────────
-
+  // Details Builder
   static NotificationDetails _buildDetails({
     String channelId = 'default_channel',
     String channelName = 'General',
@@ -77,17 +76,17 @@ class NotificationService {
       priority: priority,
       icon: '@mipmap/ic_launcher',
     );
+
     const iOS = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
     );
+
     return NotificationDetails(android: android, iOS: iOS);
   }
 
-  // ─── Show ──────────────────────────────────────────────────────────────────
-
-  /// Shows a notification immediately.
+  // Shows a notification immediately.
   static Future<void> showNotification({
     required int id,
     required String title,
@@ -103,9 +102,7 @@ class NotificationService {
     );
   }
 
-  // ─── Schedule ──────────────────────────────────────────────────────────────
-
-  /// Schedules a notification at a specific [dateTime].
+  // Schedules a notification at a specific dateTime.
   static Future<void> scheduleNotification({
     required int id,
     required String title,
@@ -128,9 +125,7 @@ class NotificationService {
     );
   }
 
-  // ─── Repeating ─────────────────────────────────────────────────────────────
-
-  /// Schedules a notification to repeat on a given [interval].
+  // Schedules a notification to repeat on a given interval.
   static Future<void> scheduleRepeatingNotification({
     required int id,
     required String title,
@@ -149,23 +144,23 @@ class NotificationService {
     );
   }
 
-  // ─── Cancel ────────────────────────────────────────────────────────────────
-
-  /// Cancels a specific notification by [id].
+  // Cancels a specific notification by id.
   static Future<void> cancelNotification(int id) async {
     await _plugin.cancel(id: id);
   }
 
-  /// Cancels all pending and shown notifications.
+  // Cancels all pending and shown notifications.
   static Future<void> cancelAllNotifications() async {
     await _plugin.cancelAll();
   }
 
-  // ─── Tap Handler ──────────────────────────────────────────────────────────
-
+  // Tap Handler
   static void _onNotificationTapped(NotificationResponse response) {
-    // Called when user taps a notification while app is in foreground/background.
+    // Called when user taps a notification while
+    // app is in foreground/background.
     // Use response.payload to navigate or handle logic.
-    print('Notification tapped: payload=${response.payload}');
+    if (kDebugMode) {
+      print('Notification tapped: payload=${response.payload}');
+    }
   }
 }
