@@ -14,6 +14,18 @@ class _SleepWidgetState extends State<SleepWidget> {
   bool _loading = true;
   bool _authorized = false;
 
+  // FIX 1: Request all sleep stage types, not just SLEEP_ASLEEP.
+  // Health Connect splits sleep into multiple sub-types — querying only
+  // SLEEP_ASLEEP misses LIGHT, DEEP, and REM stages entirely.
+  // Note: SLEEP_IN_BED is iOS/HealthKit only — it does not exist in Android
+  // Health Connect and has been intentionally excluded.
+  static const _sleepTypes = [
+    HealthDataType.SLEEP_ASLEEP,
+    HealthDataType.SLEEP_LIGHT,
+    HealthDataType.SLEEP_DEEP,
+    HealthDataType.SLEEP_REM,
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -21,17 +33,16 @@ class _SleepWidgetState extends State<SleepWidget> {
   }
 
   Future<void> _initHealth() async {
-    final types = [HealthDataType.SLEEP_ASLEEP];
-    final permissions = [HealthDataAccess.READ];
+    final permissions = List.filled(_sleepTypes.length, HealthDataAccess.READ);
 
     bool? hasPerms = await _health.hasPermissions(
-      types,
+      _sleepTypes,
       permissions: permissions,
     );
 
     if (hasPerms != true) {
       _authorized = await _health.requestAuthorization(
-        types,
+        _sleepTypes,
         permissions: permissions,
       );
     } else {
@@ -49,25 +60,24 @@ class _SleepWidgetState extends State<SleepWidget> {
 
   Future<void> _fetchSleep() async {
     final now = DateTime.now();
-
-    // Look at last 24 hours
     final yesterday = now.subtract(const Duration(hours: 24));
 
     try {
       final data = await _health.getHealthDataFromTypes(
         startTime: yesterday,
         endTime: now,
-        types: [HealthDataType.SLEEP_ASLEEP],
+        types: _sleepTypes,
       );
 
-      final uniqueData = data.toSet().toList();
+      // FIX 2: Use removeDuplicates() instead of toSet().toList() —
+      // HealthDataPoint doesn't implement == so Set dedup was ineffective
+      final uniqueData = _health.removeDuplicates(data);
+
+      final sleepData = uniqueData;
 
       Duration totalSleep = Duration.zero;
-
-      for (var d in uniqueData) {
-        final start = d.dateFrom;
-        final end = d.dateTo;
-        totalSleep += end.difference(start);
+      for (var d in sleepData) {
+        totalSleep += d.dateTo.difference(d.dateFrom);
       }
 
       setState(() {
