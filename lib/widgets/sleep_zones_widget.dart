@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:health/health.dart';
 
 class SleepZonesWidget extends StatefulWidget {
-  const SleepZonesWidget({Key? key}) : super(key: key);
+  const SleepZonesWidget({super.key});
 
   @override
   State<SleepZonesWidget> createState() => _SleepZonesWidgetState();

@@ -50,24 +50,32 @@ class _HeartRateWidgetState extends State<HeartRateWidget> {
 
   Future<void> _fetchHeartRate() async {
     final now = DateTime.now();
-    final tenMinutesAgo = now.subtract(const Duration(minutes: 10));
+    // FIX 2: Widened from 10 minutes to 3 hours to account for
+    // wearable/Health Connect sync delays (often 15–30+ mins)
+    final start = now.subtract(const Duration(hours: 3));
 
     try {
-      // Get heart rate data from the last 10 minutes
       final data = await _health.getHealthDataFromTypes(
-        startTime: tenMinutesAgo,
+        startTime: start,
         endTime: now,
         types: [HealthDataType.HEART_RATE],
       );
 
-      // Remove duplicates manually
-      final uniqueData = data.toSet().toList();
+      // FIX 3: Replaced .toSet().toList() with the built-in deduplication
+      // method — HealthDataPoint doesn't implement == so Set was ineffective
+      final uniqueData = _health.removeDuplicates(data);
 
-      // Take the last/latest entry
+      // FIX 4: Sort ascending so .last is genuinely the most recent reading
+      uniqueData.sort((a, b) => a.dateFrom.compareTo(b.dateFrom));
+
       final latest = uniqueData.isNotEmpty ? uniqueData.last : null;
 
       setState(() {
-        _heartRate = latest != null ? (latest.value as num).toInt() : null;
+        // FIX 1: Cast to NumericHealthValue first before reading the numeric
+        // value — HealthDataPoint.value is a HealthValue object, not a raw num
+        _heartRate = latest != null
+            ? (latest.value as NumericHealthValue).numericValue.toInt()
+            : null;
         _loading = false;
       });
 
