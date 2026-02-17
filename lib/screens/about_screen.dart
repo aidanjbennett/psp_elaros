@@ -8,7 +8,7 @@ class AboutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Elaros Health App")),
-      bottomNavigationBar: MainNavbar(currentIndex: 0),
+      bottomNavigationBar: MainNavbar(currentIndex: 1),
       body: SafeArea(
         child: Column(children: [Text("Hello, World from About")]),
       ),
