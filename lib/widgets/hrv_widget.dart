@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:health/health.dart';
 
@@ -14,6 +15,14 @@ class _HRVWidgetState extends State<HRVWidget> {
   bool _loading = true;
   bool _authorized = false;
 
+  // FIX: SDNN is iOS/HealthKit only. Android Health Connect only supports RMSSD.
+  // Use the correct type per platform.
+  HealthDataType get _hrvType => Platform.isIOS
+      ? HealthDataType.HEART_RATE_VARIABILITY_SDNN
+      : HealthDataType.HEART_RATE_VARIABILITY_RMSSD;
+
+  String get _hrvLabel => Platform.isIOS ? 'HRV (SDNN)' : 'HRV (RMSSD)';
+
   @override
   void initState() {
     super.initState();
@@ -21,7 +30,7 @@ class _HRVWidgetState extends State<HRVWidget> {
   }
 
   Future<void> _initHealth() async {
-    final types = [HealthDataType.HEART_RATE_VARIABILITY_SDNN];
+    final types = [_hrvType];
     final permissions = [HealthDataAccess.READ];
 
     bool? hasPerms = await _health.hasPermissions(
@@ -49,28 +58,31 @@ class _HRVWidgetState extends State<HRVWidget> {
 
   Future<void> _fetchHRV() async {
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    // Widened to 24 hours — RMSSD is only recorded during sleep by most
+    // wearables, so 3 hours from now will miss last night's data entirely
+    final start = now.subtract(const Duration(hours: 24));
 
     try {
-      // Get HRV data for today
       final data = await _health.getHealthDataFromTypes(
-        startTime: today,
+        startTime: start,
         endTime: now,
-        types: [HealthDataType.HEART_RATE_VARIABILITY_SDNN],
+        types: [_hrvType],
       );
 
-      // Remove duplicates
-      final uniqueData = data.toSet().toList();
+      final uniqueData = _health.removeDuplicates(data);
 
-      // Take the latest HRV value
+      uniqueData.sort((a, b) => a.dateFrom.compareTo(b.dateFrom));
+
       final latest = uniqueData.isNotEmpty ? uniqueData.last : null;
 
       setState(() {
-        _hrv = latest != null ? (latest.value as num).toDouble() : null;
+        _hrv = latest != null
+            ? (latest.value as NumericHealthValue).numericValue.toDouble()
+            : null;
         _loading = false;
       });
 
-      print("Latest HRV: $_hrv ms");
+      print("Latest $_hrvLabel: $_hrv ms");
     } catch (e) {
       print("Error fetching HRV: $e");
       setState(() => _loading = false);
@@ -95,7 +107,7 @@ class _HRVWidgetState extends State<HRVWidget> {
     return Center(
       child: Text(
         _hrv != null
-            ? 'HRV (SDNN): ${_hrv!.toStringAsFixed(1)} ms'
+            ? '$_hrvLabel: ${_hrv!.toStringAsFixed(1)} ms'
             : 'No HRV data',
         style: const TextStyle(fontSize: 24),
       ),
