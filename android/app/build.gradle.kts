@@ -9,6 +9,9 @@ android {
     namespace = "com.example.psp_elaros"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
+    
+    // Needed for flutter local notis
+    isCoreLibraryDesugaringEnabled = true
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -41,4 +44,8 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
