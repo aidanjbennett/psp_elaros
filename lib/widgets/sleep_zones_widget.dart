@@ -10,11 +10,20 @@ class SleepZonesWidget extends StatefulWidget {
 
 class _SleepZonesWidgetState extends State<SleepZonesWidget> {
   final Health _health = Health();
-
-  double _asleep = 0;
-  double _awake = 0;
-  double _inBed = 0;
+  double _light = 0;
+  double _deep = 0;
+  double _rem = 0;
   bool _loading = true;
+  bool _authorized = false;
+
+  // SLEEP_ASLEEP is a catch-all for devices that can't distinguish between
+  // stages. Since this device records LIGHT, DEEP and REM it will always be 0
+  // so it has been removed.
+  static const _sleepTypes = [
+    HealthDataType.SLEEP_LIGHT,
+    HealthDataType.SLEEP_DEEP,
+    HealthDataType.SLEEP_REM,
+  ];
 
   @override
   void initState() {
@@ -23,24 +32,26 @@ class _SleepZonesWidgetState extends State<SleepZonesWidget> {
   }
 
   Future<void> _initHealth() async {
-    final types = [
-      HealthDataType.SLEEP_ASLEEP,
-      HealthDataType.SLEEP_AWAKE,
-      HealthDataType.SLEEP_IN_BED,
-    ];
+    final permissions = List.filled(_sleepTypes.length, HealthDataAccess.READ);
 
-    final permissions = [
-      HealthDataAccess.READ,
-      HealthDataAccess.READ,
-      HealthDataAccess.READ,
-    ];
-
-    bool granted = await _health.requestAuthorization(
-      types,
+    // FIX 2: Check existing permissions before requesting — calling
+    // requestAuthorization every time forces the permission dialog to show
+    // on every launch even if already granted
+    bool? hasPerms = await _health.hasPermissions(
+      _sleepTypes,
       permissions: permissions,
     );
 
-    if (!granted) {
+    if (hasPerms != true) {
+      _authorized = await _health.requestAuthorization(
+        _sleepTypes,
+        permissions: permissions,
+      );
+    } else {
+      _authorized = true;
+    }
+
+    if (!_authorized) {
       print("❌ Sleep permission not granted");
       setState(() => _loading = false);
       return;
@@ -53,54 +64,66 @@ class _SleepZonesWidgetState extends State<SleepZonesWidget> {
     final now = DateTime.now();
     final yesterday = now.subtract(const Duration(hours: 24));
 
-    final types = [
-      HealthDataType.SLEEP_ASLEEP,
-      HealthDataType.SLEEP_AWAKE,
-      HealthDataType.SLEEP_IN_BED,
-    ];
+    try {
+      List<HealthDataPoint> data = await _health.getHealthDataFromTypes(
+        startTime: yesterday,
+        endTime: now,
+        types: _sleepTypes,
+      );
 
-    List<HealthDataPoint> data = await _health.getHealthDataFromTypes(
-      startTime: yesterday,
-      endTime: now,
-      types: types,
-    );
+      // Use built-in deduplication
+      final uniqueData = _health.removeDuplicates(data);
 
-    double asleep = 0;
-    double awake = 0;
-    double inBed = 0;
+      double light = 0;
+      double deep = 0;
+      double rem = 0;
 
-    for (var point in data) {
-      final hours = point.value is NumericHealthValue
-          ? (point.value as NumericHealthValue).numericValue / 60
-          : 0;
+      for (var point in uniqueData) {
+        // Sleep duration comes from the difference between dateFrom and dateTo
+        final hours = point.dateTo.difference(point.dateFrom).inMinutes / 60;
 
-      switch (point.type) {
-        case HealthDataType.SLEEP_ASLEEP:
-          asleep += hours;
-          break;
-        case HealthDataType.SLEEP_AWAKE:
-          awake += hours;
-          break;
-        case HealthDataType.SLEEP_IN_BED:
-          inBed += hours;
-          break;
-        default:
-          break;
+        switch (point.type) {
+          case HealthDataType.SLEEP_LIGHT:
+            light += hours;
+            break;
+          case HealthDataType.SLEEP_DEEP:
+            deep += hours;
+            break;
+          case HealthDataType.SLEEP_REM:
+            rem += hours;
+            break;
+          default:
+            break;
+        }
       }
-    }
 
-    setState(() {
-      _asleep = asleep;
-      _awake = awake;
-      _inBed = inBed;
-      _loading = false;
-    });
+      setState(() {
+        _light = light;
+        _deep = deep;
+        _rem = rem;
+        _loading = false;
+      });
+
+      print("Sleep zones — Light: $_light, Deep: $_deep, REM: $_rem");
+    } catch (e) {
+      print("Error fetching sleep zones: $e");
+      setState(() => _loading = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const CircularProgressIndicator();
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (!_authorized) {
+      return const Center(
+        child: Text(
+          "Sleep permission not granted",
+          style: TextStyle(fontSize: 18),
+        ),
+      );
     }
 
     return Card(
@@ -113,9 +136,9 @@ class _SleepZonesWidgetState extends State<SleepZonesWidget> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            Text("😴 Asleep: ${_asleep.toStringAsFixed(2)} hrs"),
-            Text("👀 Awake: ${_awake.toStringAsFixed(2)} hrs"),
-            Text("🛌 In Bed: ${_inBed.toStringAsFixed(2)} hrs"),
+            Text("💤 Light: ${_light.toStringAsFixed(2)} hrs"),
+            Text("🌊 Deep: ${_deep.toStringAsFixed(2)} hrs"),
+            Text("🧠 REM: ${_rem.toStringAsFixed(2)} hrs"),
           ],
         ),
       ),
