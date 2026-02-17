@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:health/health.dart';
 
+// TODO: Maybe do background refresh if not already doing so
 class HeartRateWidget extends StatefulWidget {
   const HeartRateWidget({super.key});
 
