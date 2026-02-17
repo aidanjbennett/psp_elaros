@@ -21,7 +21,7 @@ class NotificationService {
   static Future<void> init() async {
     tz.initializeTimeZones();
 
-    const android = AndroidInitializationSettings('@drawable/ic_notification');
+    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iOS = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
@@ -75,7 +75,7 @@ class NotificationService {
       channelDescription: channelDescription,
       importance: importance,
       priority: priority,
-      icon: '@drawable/ic_notification',
+      icon: '@mipmap/ic_launcher',
     );
     const iOS = DarwinNotificationDetails(
       presentAlert: true,
