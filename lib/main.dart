@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:psp_elaros/screens/about_screen.dart';
 import 'package:psp_elaros/screens/home_screen.dart';
+import 'package:psp_elaros/services/notification_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // required before any async setup
+  await NotificationService.init();
   runApp(const ElarosApp());
 }
 
