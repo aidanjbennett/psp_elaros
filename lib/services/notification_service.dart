@@ -3,7 +3,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-// ✅ Must be top-level — runs in a separate isolate when app is terminated
+// Must be top-level — runs in a separate isolate when app is terminated
 @pragma('vm:entry-point')
 void onBackgroundNotificationTapped(NotificationResponse response) {
   if (kDebugMode) {
