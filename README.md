@@ -19,4 +19,6 @@ samples, guidance on mobile development, and a full API reference.
 - heart rate varaiblity /
 - steps /
 - sleep /
-- sleep zones
+- sleep zones /
+
+Get data every 15 minutes and save to db

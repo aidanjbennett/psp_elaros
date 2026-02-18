@@ -1,15 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:psp_elaros/data/repositories/health_repository.dart';
 import 'package:flutter/services.dart';
 import 'package:psp_elaros/router/app_router.dart';
 import 'package:psp_elaros/screens/about_screen.dart';
 import 'package:psp_elaros/screens/home_screen.dart';
 import 'package:psp_elaros/screens/metrics_screen.dart';
 import 'package:psp_elaros/services/notification_service.dart';
+import 'package:workmanager/workmanager.dart';
+import 'background/health_sync_task.dart';
+
+Future<void> _registerBackgroundTask() async {
+  await Workmanager().initialize(healthSyncCallbackDispatcher);
+  await Workmanager().registerPeriodicTask(
+    'health-sync-task',
+    HealthSyncTask.taskName,
+    frequency: const Duration(minutes: 15),
+    constraints: Constraints(
+      networkType: NetworkType.notRequired,
+      requiresBatteryNotLow: true,
+    ),
+    existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
+  );
+}
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // required before any async setup
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await _registerBackgroundTask(); // This might need to be first
+
   await NotificationService.init();
 
+  final healthRepo = HealthRepository();
+  await healthRepo.requestPermissions();
+  
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,

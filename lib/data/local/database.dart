@@ -4,7 +4,7 @@ import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
-part 'app_database.g.dart';
+part 'database.g.dart';
 
 mixin LastModified on Table {
   DateTimeColumn get lastModifiedTime =>

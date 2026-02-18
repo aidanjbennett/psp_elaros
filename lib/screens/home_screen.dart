@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:psp_elaros/services/notification_service.dart';
-import 'package:psp_elaros/widgets/heart_rate_widget.dart';
-import 'package:psp_elaros/widgets/hrv_widget.dart';
 import 'package:psp_elaros/widgets/main_navbar_widget.dart';
-import 'package:psp_elaros/widgets/sleep_widget.dart';
-import 'package:psp_elaros/widgets/sleep_zones_widget.dart';
-import 'package:psp_elaros/widgets/steps_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,11 +18,6 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            StepsWidget(),
-            HeartRateWidget(),
-            HRVWidget(),
-            SleepWidget(),
-            SleepZonesWidget(),
             ElevatedButton(
               onPressed: () => NotificationService.showNotification(
                 id: 1,

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:health/health.dart';
 
@@ -48,7 +49,9 @@ class _HRVWidgetState extends State<HRVWidget> {
     }
 
     if (!_authorized) {
-      print("❌ Health Connect HRV permission not granted");
+      if (kDebugMode) {
+        print("Health Connect HRV permission not granted");
+      }
       setState(() => _loading = false);
       return;
     }
@@ -82,9 +85,13 @@ class _HRVWidgetState extends State<HRVWidget> {
         _loading = false;
       });
 
-      print("Latest $_hrvLabel: $_hrv ms");
+      if (kDebugMode) {
+        print("Latest $_hrvLabel: $_hrv ms");
+      }
     } catch (e) {
-      print("Error fetching HRV: $e");
+      if (kDebugMode) {
+        print("Error fetching HRV: $e");
+      }
       setState(() => _loading = false);
     }
   }
