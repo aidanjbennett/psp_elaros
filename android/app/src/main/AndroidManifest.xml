@@ -33,7 +33,9 @@
     <application
         android:label="psp_elaros"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:enableOnBackInvokedCallback="true"
+        >
 
         <!-- Required for Health Connect: links to privacy policy from permissions screen -->
         <activity-alias
