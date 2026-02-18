@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import workmanager_apple
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -7,10 +8,24 @@ import UIKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+
+    // Notifications
     if #available(iOS 10.0, *) {
       UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
     }
+
+    // Work Manager Required
+    WorkmanagerPlugin.registerBGProcessingTask(
+      withIdentifier: "com.example.processing_task"
+    )
+
+    WorkmanagerPlugin.registerPeriodicTask(
+      withIdentifier: "com.example.periodic_task",
+      frequency: NSNumber(value: 15 * 60)  // (15 min minimum)
+    )
+
     GeneratedPluginRegistrant.register(with: self)
+
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }
