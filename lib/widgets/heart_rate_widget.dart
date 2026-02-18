@@ -1,7 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:health/health.dart';
 
-// TODO: Maybe do background refresh if not already doing so
 class HeartRateWidget extends StatefulWidget {
   const HeartRateWidget({super.key});
 
@@ -41,7 +41,9 @@ class _HeartRateWidgetState extends State<HeartRateWidget> {
     }
 
     if (!_authorized) {
-      print("❌ Health Connect heart rate permission not granted");
+      if (kDebugMode) {
+        print("Health Connect heart rate permission not granted");
+      }
       setState(() => _loading = false);
       return;
     }
@@ -80,9 +82,13 @@ class _HeartRateWidgetState extends State<HeartRateWidget> {
         _loading = false;
       });
 
-      print("Latest heart rate: $_heartRate bpm");
+      if (kDebugMode) {
+        print("Latest heart rate: $_heartRate bpm");
+      }
     } catch (e) {
-      print("Error fetching heart rate: $e");
+      if (kDebugMode) {
+        print("Error fetching heart rate: $e");
+      }
       setState(() => _loading = false);
     }
   }

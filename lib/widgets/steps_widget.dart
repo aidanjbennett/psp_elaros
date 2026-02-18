@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:health/health.dart';
 
@@ -41,12 +42,17 @@ class _StepsWidgetState extends State<StepsWidget> {
     }
 
     if (!_isAuthorized) {
-      print("❌ Authorization not granted");
+      if (kDebugMode) {
+        print("Authorization not granted");
+      }
       setState(() => _isLoading = false);
       return;
     }
 
-    print("✅ Authorization granted");
+    if (kDebugMode) {
+      print("Authorization granted");
+    }
+
     await _fetchSteps();
   }
 
@@ -62,9 +68,14 @@ class _StepsWidgetState extends State<StepsWidget> {
         _isLoading = false;
       });
 
-      print("👣 Today's steps: $_steps");
+      if (kDebugMode) {
+        print("Today's steps: $_steps");
+      }
     } catch (e) {
-      print("Error fetching steps: $e");
+      if (kDebugMode) {
+        print("Error fetching steps: $e");
+      }
+
       setState(() => _isLoading = false);
     }
   }

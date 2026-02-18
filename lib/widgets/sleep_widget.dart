@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:health/health.dart';
 
@@ -50,7 +51,9 @@ class _SleepWidgetState extends State<SleepWidget> {
     }
 
     if (!_authorized) {
-      print("❌ Sleep permission not granted");
+      if (kDebugMode) {
+        print("❌ Sleep permission not granted");
+      }
       setState(() => _loading = false);
       return;
     }
@@ -85,9 +88,13 @@ class _SleepWidgetState extends State<SleepWidget> {
         _loading = false;
       });
 
-      print("Total sleep: $_sleepDuration");
+      if (kDebugMode) {
+        print("Total sleep: $_sleepDuration");
+      }
     } catch (e) {
-      print("Error fetching sleep: $e");
+      if (kDebugMode) {
+        print("Error fetching sleep: $e");
+      }
       setState(() => _loading = false);
     }
   }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:health/health.dart';
 
@@ -52,7 +53,9 @@ class _SleepZonesWidgetState extends State<SleepZonesWidget> {
     }
 
     if (!_authorized) {
-      print("❌ Sleep permission not granted");
+      if (kDebugMode) {
+        print("Sleep permission not granted");
+      }
       setState(() => _loading = false);
       return;
     }
@@ -104,9 +107,13 @@ class _SleepZonesWidgetState extends State<SleepZonesWidget> {
         _loading = false;
       });
 
-      print("Sleep zones — Light: $_light, Deep: $_deep, REM: $_rem");
+      if (kDebugMode) {
+        print("Sleep zones — Light: $_light, Deep: $_deep, REM: $_rem");
+      }
     } catch (e) {
-      print("Error fetching sleep zones: $e");
+      if (kDebugMode) {
+        print("Error fetching sleep zones: $e");
+      }
       setState(() => _loading = false);
     }
   }
