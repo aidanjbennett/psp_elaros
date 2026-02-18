@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:health/health.dart';
 import 'package:psp_elaros/data/repositories/health_repository.dart';
 
 class HealthSyncService {
@@ -18,10 +19,30 @@ class HealthSyncService {
     final dataPoints = await _healthRepo.fetchRecent(from: from, to: now);
 
     for (final point in dataPoints) {
-      // TODO: Actually save this in data
-
       if (kDebugMode) {
-        print(point);
+        final type = point.type;
+        final value = point.value;
+
+        // Extract the numeric value safely
+        final numericValue = (value is NumericHealthValue)
+            ? value.numericValue.toDouble().toStringAsFixed(1)
+            : value.toString();
+
+        // Determine the unit
+        String unit = '';
+        if (type == HealthDataType.STEPS) {
+          unit = 'steps';
+        } else if (type == HealthDataType.HEART_RATE) {
+          unit = 'bpm';
+        } else if (type.name.contains('SLEEP')) {
+          unit = 'min';
+        } else if (type.name.contains('VARIABILITY')) {
+          unit = 'ms';
+        }
+
+        print(
+          '${type.name.replaceFirst('HealthDataType.', '')}: $numericValue $unit',
+        );
       }
     }
 
