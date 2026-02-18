@@ -1,0 +1,47 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+
+class DashboardShell extends StatelessWidget {
+  // 1. Accept the shell from the router
+  final StatefulNavigationShell navigationShell;
+
+  const DashboardShell({
+    super.key,
+    required this.navigationShell,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: navigationShell,
+
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: navigationShell.currentIndex,
+
+        onDestinationSelected: (int index) => _onBranch(index),
+
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.bar_chart),
+            label: 'Metrics',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.track_changes),
+            label: 'Goals',
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onBranch(int index) {
+    navigationShell.goBranch(
+      index,
+      // A common pattern when using bottom navigation.
+      // If the user taps the item that is already selected,
+      // return to the initial location of the branch (reset the stack).
+      initialLocation: index == navigationShell.currentIndex,
+    );
+  }
+}
