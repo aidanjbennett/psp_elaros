@@ -6,29 +6,29 @@ import 'package:psp_elaros/services/notification_service.dart';
 import 'package:workmanager/workmanager.dart';
 import 'background/health_sync_task.dart';
 
-// Future<void> _registerBackgroundTask() async {
-//   await Workmanager().initialize(healthSyncCallbackDispatcher);
-//   await Workmanager().registerPeriodicTask(
-//     'health-sync-task',
-//     HealthSyncTask.taskName,
-//     frequency: const Duration(minutes: 15),
-//     constraints: Constraints(
-//       networkType: NetworkType.notRequired,
-//       requiresBatteryNotLow: true,
-//     ),
-//     existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
-//   );
-// }
+Future<void> _registerBackgroundTask() async {
+  await Workmanager().initialize(healthSyncCallbackDispatcher);
+  await Workmanager().registerPeriodicTask(
+    'health-sync-task',
+    HealthSyncTask.taskName,
+    frequency: const Duration(minutes: 15),
+    constraints: Constraints(
+      networkType: NetworkType.notRequired,
+      requiresBatteryNotLow: true,
+    ),
+    existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
+  );
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await _registerBackgroundTask(); // This might need to be first
 
   await NotificationService.init();
 
   final healthRepo = HealthRepository();
   await healthRepo.requestPermissions();
-
-  // await _registerBackgroundTask();
 
   runApp(const ElarosApp());
 }
