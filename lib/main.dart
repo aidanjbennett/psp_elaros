@@ -6,6 +6,7 @@ import 'package:psp_elaros/screens/about_screen.dart';
 import 'package:psp_elaros/screens/home_screen.dart';
 import 'package:psp_elaros/screens/metrics_screen.dart';
 import 'package:psp_elaros/services/notification_service.dart';
+import 'package:psp_elaros/style/app_style.dart';
 import 'package:workmanager/workmanager.dart';
 import 'background/health_sync_task.dart';
 
@@ -54,9 +55,7 @@ class ElarosApp extends StatelessWidget {
       title: 'My Flutter App',
       routerConfig: router,
 
-      theme: ThemeData(
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light(),
     );
   }
 }
