@@ -23,11 +23,11 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            StepsWidget(),
-            HeartRateWidget(),
-            HRVWidget(),
-            SleepWidget(),
-            SleepZonesWidget(),
+            // StepsWidget(),
+            // HeartRateWidget(),
+            // HRVWidget(),
+            // SleepWidget(),
+            // SleepZonesWidget(),
             ElevatedButton(
               onPressed: () => NotificationService.showNotification(
                 id: 1,
