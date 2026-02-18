@@ -24,6 +24,8 @@ import workmanager_apple
       frequency: NSNumber(value: 15 * 60)  // (15 min minimum)
     )
 
+    WorkmanagerDebug.setCurrent(LoggingDebugHandler())
+
     GeneratedPluginRegistrant.register(with: self)
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
