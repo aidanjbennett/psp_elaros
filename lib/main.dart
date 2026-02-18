@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:psp_elaros/data/repositories/health_repository.dart';
+import 'package:flutter/services.dart';
+import 'package:psp_elaros/router/app_router.dart';
 import 'package:psp_elaros/screens/about_screen.dart';
 import 'package:psp_elaros/screens/home_screen.dart';
+import 'package:psp_elaros/screens/metrics_screen.dart';
 import 'package:psp_elaros/services/notification_service.dart';
 import 'package:workmanager/workmanager.dart';
 import 'background/health_sync_task.dart';
@@ -29,6 +32,15 @@ void main() async {
 
   final healthRepo = HealthRepository();
   await healthRepo.requestPermissions();
+  
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.dark,
+      systemNavigationBarDividerColor: Colors.transparent,
+    ),
+  );
 
   runApp(const ElarosApp());
 }
@@ -38,13 +50,13 @@ class ElarosApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      initialRoute: '/home',
-      routes: {
-        '/home': (context) => const HomeScreen(),
-        '/about': (context) => const AboutScreen(),
-      },
+    return MaterialApp.router(
+      title: 'My Flutter App',
+      routerConfig: router,
+
+      theme: ThemeData(
+        useMaterial3: true,
+      ),
     );
   }
 }
