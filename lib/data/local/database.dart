@@ -76,6 +76,36 @@ class HealthOverview extends Table with LastModified {
   IntColumn get baselineId => integer().references(Baseline, #baselineId)();
 }
 
+class Settings extends Table with LastModified {
+  IntColumn get settingsId => integer().autoIncrement()();
+
+  BoolColumn get theme => boolean()();
+
+  TextColumn get font => text()();
+
+  BoolColumn get reducedMotion => boolean()();
+
+  IntColumn get fontSize => integer()();
+}
+
+
+class Users extends Table with LastModified {
+  IntColumn get infoId => integer().autoIncrement()();
+
+  TextColumn get name => text()();
+
+  IntColumn get weight => integer()();
+
+  DateTimeColumn get dob => dateTime()();
+
+  IntColumn get height => integer()();
+}
+
+
+
+
+
+
 /// ----------------------------
 /// DATABASE
 /// ----------------------------
@@ -89,6 +119,7 @@ class HealthOverview extends Table with LastModified {
     HeartRate,
     Baseline,
     HealthOverview,
+    Settings,
   ],
 )
 class AppDatabase extends _$AppDatabase {
