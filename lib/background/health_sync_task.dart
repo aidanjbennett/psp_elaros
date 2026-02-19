@@ -1,6 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:psp_elaros/data/repositories/health_repository.dart';
-import 'package:psp_elaros/services/health_sync_service.dart';
 import 'package:workmanager/workmanager.dart';
 
 class HealthSyncTask {
@@ -22,10 +20,10 @@ void healthSyncCallbackDispatcher() {
       // Background isolates do not share memory with the main app isolate
       // final db = AppDatabase();
 
-      final repo = HealthRepository();
+      // final repo = HealthRepository();
 
       try {
-        await HealthSyncService(healthRepo: repo).sync();
+        // await HealthSyncService(healthRepo: repo).sync();
         return true;
       } catch (e) {
         return false;
