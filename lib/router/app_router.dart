@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:psp_elaros/screens/dashboard_shell.dart';
 import 'package:psp_elaros/screens/metrics_screen.dart';
+import 'package:psp_elaros/screens/goals_screen.dart';
 import 'package:psp_elaros/screens/settings/root_settings.dart';
 import 'package:psp_elaros/screens/settings/submenus/colour_settings_submenu.dart';
 import 'package:psp_elaros/screens/settings/submenus/motion_settings_submenu.dart';
@@ -34,7 +35,7 @@ final router = GoRouter(
                 routes: [
                   GoRoute(
                       path: '/goals',
-                    builder: (context, state) => const Text("HEloo")
+                    builder: (context, state) => const GoalsScreen(),
                   )
                 ]
             ),
