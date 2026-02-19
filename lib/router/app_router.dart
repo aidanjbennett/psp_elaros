@@ -5,8 +5,13 @@ import 'package:psp_elaros/screens/dashboard_shell.dart';
 import 'package:psp_elaros/screens/metrics_screen.dart';
 import 'package:psp_elaros/screens/settings/root_settings.dart';
 import 'package:psp_elaros/screens/settings/submenus/colour_settings_submenu.dart';
+import 'package:psp_elaros/screens/settings/submenus/data_settings_submenu.dart';
+import 'package:psp_elaros/screens/settings/submenus/health_biometrics_settings_submenu.dart';
+import 'package:psp_elaros/screens/settings/submenus/heart_rate_settings_submenu.dart';
 import 'package:psp_elaros/screens/settings/submenus/motion_settings_submenu.dart';
 import 'package:psp_elaros/screens/settings/submenus/notification_settings_submenu.dart';
+import 'package:psp_elaros/screens/settings/submenus/personal_info_submenu.dart';
+import 'package:psp_elaros/screens/settings/submenus/typography_settings_submenu.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -57,6 +62,26 @@ final router = GoRouter(
             GoRoute(
               path: 'notification',
               builder: (context, state) => const NotificationSettingsSubmenu(),
+            ),
+            GoRoute(
+              path: 'typography',
+              builder: (context, state) => const TypographySettingsSubmenu()
+            ),
+            GoRoute(
+                path: 'personal_info',
+                builder: (context, state) => const PersonalInfoSettingsSubmenu()
+            ),
+            GoRoute(
+                path: 'health_biometrics',
+                builder: (context, state) => const HealthBiometricsSubmenu()
+            ),
+            GoRoute(
+                path: 'heart_rate',
+                builder: (context, state) => const HRZonesSettingsSubmenu()
+            ),
+            GoRoute(
+                path: 'data',
+                builder: (context, state) => const ExportDataSettingsSubmenu()
             ),
           ]
       ),
