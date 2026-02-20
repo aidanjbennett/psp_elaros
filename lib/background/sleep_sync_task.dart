@@ -1,31 +1,33 @@
 import 'package:flutter/foundation.dart';
+import 'package:psp_elaros/data/models/sleep_model.dart';
 import 'package:psp_elaros/data/repositories/health_repository.dart';
-import 'package:psp_elaros/services/health_sync_service.dart';
 import 'package:workmanager/workmanager.dart';
 
-class HealthSyncTask {
-  static const taskName = 'healthSyncTask';
+class SleepSyncTask {
+  static const taskName = 'stepSyncTask';
 }
 
 @pragma('vm:entry-point')
-void healthSyncCallbackDispatcher() {
+void sleepSyncTaskCallbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     if (kDebugMode) {
-      print("Running task");
+      print("Running Sleep task");
     }
     // iOS sometimes passes 'iOSBackgroundTask' or the unique ID
     // Check for both to be safe
-    if (task == HealthSyncTask.taskName ||
-        task == 'health-sync-task' ||
+    if (task == SleepSyncTask.taskName ||
+        task == 'sleep-sync-task' ||
         task == Workmanager.iOSBackgroundTask) {
-      // IMPORTANT: Initialize your database INSIDE the task
-      // Background isolates do not share memory with the main app isolate
-      // final db = AppDatabase();
-
       final repo = HealthRepository();
 
       try {
-        await HealthSyncService(healthRepo: repo).sync();
+        Sleep sleepData = await repo.getLastNightSleep();
+        double totalSleep = sleepData.totalHours;
+
+        if (kDebugMode) {
+          print("Sleep $totalSleep");
+        }
+
         return true;
       } catch (e) {
         return false;
