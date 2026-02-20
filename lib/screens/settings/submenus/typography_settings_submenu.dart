@@ -16,6 +16,7 @@ class _TypographySettingsSubmenuState extends State<TypographySettingsSubmenu> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(title: const Text("Typography"), centerTitle: true),
       body: ListView(

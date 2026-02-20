@@ -9,12 +9,13 @@ class SettingsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Opacity(
       opacity: item.enabled ? 1.0 : 0.4, // Standard M3 disabled opacity
       child: Container(
         decoration: BoxDecoration(
           // Dynamically sets the card background to the lightest shade of the base color
-          color: item.baseColor.shade50,
+          color: scheme.surfaceContainer,
           borderRadius: borderRadius,
         ),
         child: Material(
@@ -28,13 +29,13 @@ class SettingsItem extends StatelessWidget {
               child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
                 // Reclaims space if no icon exists
-                leading: item.icon != null ? _buildLeading() : null,
+                leading: item.icon != null ? _buildLeading(context) : null,
                 title: Text(
                   item.title,
                   style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                 ),
                 subtitle: item.subtitle != null
-                    ? Text(item.subtitle!, style: TextStyle(color: Colors.grey.shade600, fontSize: 13))
+                    ? Text(item.subtitle!, style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 13))
                     : null,
                 trailing: IntrinsicWidth(
                   child: Row(
@@ -64,10 +65,11 @@ class SettingsItem extends StatelessWidget {
     }
   }
 
-  Widget _buildLeading() {
+  Widget _buildLeading(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Ink(
       decoration: BoxDecoration(
-        color: item.baseColor.shade100,
+        color: scheme.primary.withValues(alpha: 0.2),
         shape: BoxShape.circle,
       ),
       child: SizedBox(
@@ -77,7 +79,7 @@ class SettingsItem extends StatelessWidget {
           child: Icon(
             item.icon,
             size: item.customIconSize ?? 20,
-            color: item.baseColor.shade700,
+            color: scheme.primary,
           ),
         ),
       ),
@@ -85,14 +87,17 @@ class SettingsItem extends StatelessWidget {
   }
 
   Widget _buildHelpButton(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return IconButton(
       visualDensity: VisualDensity.compact,
-      icon: Icon(Icons.help_outline, size: 20, color: item.baseColor.shade300),
+      icon: Icon(Icons.help_outline, size: 20, color: scheme.primary.withAlpha(100)),
       onPressed: item.enabled ? () => _showHelpDialog(context) : null,
     );
   }
 
   Widget _buildTrailingAction(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     switch (item.type) {
       case SettingsItemType.toggle:
         return Switch(
@@ -120,7 +125,7 @@ class SettingsItem extends StatelessWidget {
             Text(
                 item.stringValue ?? "",
                 style: TextStyle(
-                  color: item.enabled ? Colors.grey.shade700 : Colors.grey.shade400,
+                  color: item.enabled ? scheme.onSurfaceVariant : scheme.onSurfaceVariant.withAlpha(100),
                   fontWeight: FontWeight.w500,
                   fontSize: 13,
                 )
@@ -128,7 +133,7 @@ class SettingsItem extends StatelessWidget {
             const SizedBox(width: 4),
             Icon(
               Icons.chevron_right,
-              color: item.enabled ? Colors.grey : Colors.grey.shade300,
+              color: item.enabled ? scheme.onSurface : scheme.onSurfaceVariant.withAlpha(100),
               size: 20,
             ),
           ],
@@ -142,7 +147,7 @@ class SettingsItem extends StatelessWidget {
             Text(
               item.stringValue ?? "",
               style: TextStyle(
-                color: item.enabled ? item.baseColor.shade700 : Colors.grey.shade400,
+                color: item.enabled ? scheme.onSurface : scheme.onSurfaceVariant.withAlpha(100),
                 fontWeight: FontWeight.w500,
                 fontSize: 14,
               ),
@@ -151,7 +156,7 @@ class SettingsItem extends StatelessWidget {
             // A small edit icon to indicate interactivity
             Icon(
                 Icons.edit_outlined,
-                color: item.enabled ? Colors.grey.shade500 : Colors.grey.shade300,
+                color: item.enabled ? scheme.onSurfaceVariant : scheme.onSurfaceVariant.withAlpha(100),
                 size: 18
             ),
           ],
@@ -165,7 +170,7 @@ class SettingsItem extends StatelessWidget {
       default:
         return Icon(
             Icons.chevron_right,
-            color: item.enabled ? Colors.grey.shade600 : Colors.grey.shade300,
+            color: item.enabled ? scheme.onSurfaceVariant : scheme.onSurfaceVariant.withAlpha(100),
             size: 22
         );
     }

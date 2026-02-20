@@ -14,6 +14,7 @@ class SettingsGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -24,7 +25,7 @@ class SettingsGroup extends StatelessWidget {
             child: Text(
               title!,
               style: TextStyle(
-                color: Colors.deepPurple.shade800,
+                color: scheme.primary,
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
               ),

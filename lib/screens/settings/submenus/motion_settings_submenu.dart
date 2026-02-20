@@ -16,6 +16,7 @@ class _MotionSettingsSubmenuState extends State<MotionSettingsSubmenu> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(title: const Text("Motion"), centerTitle: true),
       body: ListView(

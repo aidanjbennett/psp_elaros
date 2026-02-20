@@ -18,6 +18,7 @@ class _ColourSettingsSubmenuState extends State<ColourSettingsSubmenu> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(title: const Text("Colours"), centerTitle: true),
       body: ListView(
