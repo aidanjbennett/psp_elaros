@@ -6,6 +6,20 @@ import 'package:psp_elaros/data/models/heart_rate_data_model.dart';
 import 'package:psp_elaros/data/models/heart_rate_variability_rate_model.dart';
 import 'package:psp_elaros/data/models/sleep_model.dart';
 
+class HeartMetrics {
+  final List<HeartRate> heartRates;
+  final List<HeartRateVariabilityRate> hrvRates;
+  final double? averageHeartRate;
+  final double? averageHrv;
+
+  HeartMetrics({
+    required this.heartRates,
+    required this.hrvRates,
+    required this.averageHeartRate,
+    required this.averageHrv,
+  });
+}
+
 class HealthRepository {
   final Health _health = Health();
 
@@ -28,20 +42,6 @@ class HealthRepository {
     HealthDataType.SLEEP_REM,
     HealthDataType.SLEEP_AWAKE,
   ];
-
-  class HeartMetrics {
-  final List<HeartRate> heartRates;
-  final List<HeartRateVariabilityRate> hrvRates;
-  final double? averageHeartRate;
-  final double? averageHrv;
-
-  HeartMetrics({
-    required this.heartRates,
-    required this.hrvRates,
-    required this.averageHeartRate,
-    required this.averageHrv,
-  });
-};
 
   List<HealthDataType> get _types => [..._baseTypes, _hrvType];
 
@@ -66,7 +66,7 @@ class HealthRepository {
 
   Future<List<HeartRate>> getHeartRateList() async {
     final now = DateTime.now();
-    final start = now.subtract(const Duration(minutes: 16));
+    final start = now.subtract(const Duration(hours: 2));
 
     if (kDebugMode) print("Fetching heart rate from $start to $now");
 
@@ -97,7 +97,7 @@ class HealthRepository {
 
   Future<List<HeartRateVariabilityRate>> getHeartRateVariabilityRate() async {
     final now = DateTime.now();
-    final start = now.subtract(const Duration(minutes: 20));
+    final start = now.subtract(const Duration(hours: 24));
 
     if (kDebugMode) print("Fetching HRV from $start to $now");
 
@@ -164,8 +164,8 @@ class HealthRepository {
       return Sleep(totalDuration: Duration.zero, dateChecked: now);
     }
   }
-}  
-    Future<HeartMetrics> getHeartMetrics() async {
+
+  Future<HeartMetrics> getHeartMetrics() async {
     final heartRates = await getHeartRateList();
     final hrvRates = await getHeartRateVariabilityRate();
 
@@ -173,16 +173,12 @@ class HealthRepository {
     double? avgHrv;
 
     if (heartRates.isNotEmpty) {
-      final sum = heartRates
-          .map((e) => e.value)
-          .reduce((a, b) => a + b);
+      final sum = heartRates.map((e) => e.value).reduce((a, b) => a + b);
       avgHeartRate = sum / heartRates.length;
     }
 
     if (hrvRates.isNotEmpty) {
-      final sum = hrvRates
-          .map((e) => e.value)
-          .reduce((a, b) => a + b);
+      final sum = hrvRates.map((e) => e.value).reduce((a, b) => a + b);
       avgHrv = sum / hrvRates.length;
     }
 
@@ -200,6 +196,5 @@ class HealthRepository {
       averageHeartRate: avgHeartRate,
       averageHrv: avgHrv,
     );
-    }
-
-
+  }
+}
