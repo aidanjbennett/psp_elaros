@@ -9,29 +9,24 @@ import 'package:psp_elaros/data/models/sleep_model.dart';
 class HealthRepository {
   final Health _health = Health();
 
-  // SDNN is iOS/HealthKit only. Android Health Connect only supports RMSSD.
-  // Use the correct type per platform.
   HealthDataType get _hrvType => Platform.isIOS
       ? HealthDataType.HEART_RATE_VARIABILITY_SDNN
       : HealthDataType.HEART_RATE_VARIABILITY_RMSSD;
 
   static const _baseTypes = [
-    // Steeps
     HealthDataType.STEPS,
-    // Heart Rate
     HealthDataType.HEART_RATE,
-    // Sleep
-    HealthDataType.SLEEP_ASLEEP,
     HealthDataType.SLEEP_LIGHT,
     HealthDataType.SLEEP_DEEP,
     HealthDataType.SLEEP_REM,
+    HealthDataType.SLEEP_AWAKE,
   ];
 
   static const _sleepTypes = [
-    HealthDataType.SLEEP_ASLEEP,
     HealthDataType.SLEEP_LIGHT,
     HealthDataType.SLEEP_DEEP,
     HealthDataType.SLEEP_REM,
+    HealthDataType.SLEEP_AWAKE,
   ];
 
   List<HealthDataType> get _types => [..._baseTypes, _hrvType];
@@ -49,16 +44,12 @@ class HealthRepository {
 
     final stepsOrNull = await _health.getTotalStepsInInterval(midnight, now);
 
-    final steps = stepsOrNull ?? 0;
-
-    return steps;
+    return stepsOrNull ?? 0;
   }
 
   Future<List<HeartRate>> getHeartRateList() async {
     final now = DateTime.now();
-    final start = now.subtract(
-      const Duration(minutes: 16),
-    ); // Slight overlap for safety
+    final start = now.subtract(const Duration(minutes: 16));
 
     try {
       List<HealthDataPoint> data = await _health.getHealthDataFromTypes(
@@ -73,9 +64,7 @@ class HealthRepository {
           .map((point) => HeartRate.fromHealthPoint(point))
           .toList();
     } catch (e) {
-      if (kDebugMode) {
-        print("Error fetching heart rate: $e");
-      }
+      if (kDebugMode) print("Error fetching heart rate: $e");
       return [];
     }
   }
@@ -91,29 +80,28 @@ class HealthRepository {
         types: [_hrvType],
       );
 
-      // Filter duplicates to keep the data clean
       final uniqueData = _health.removeDuplicates(data);
 
-      if (kDebugMode) {
-        print(uniqueData);
-      }
-      // Map the raw HealthDataPoint objects to our custom Model
+      if (kDebugMode) print(uniqueData);
+
       return uniqueData.map((point) {
         return HeartRateVariabilityRate.fromHealthData(point);
       }).toList();
     } catch (e) {
-      if (kDebugMode) {
-        print("Error fetching HRV: $e");
-      }
+      if (kDebugMode) print("Error fetching HRV: $e");
       return [];
     }
   }
 
   Future<Sleep> getLastNightSleep() async {
     final now = DateTime.now();
-    // Query from 8pm two days ago to 10am today to reliably capture last night
     final start = DateTime(now.year, now.month, now.day - 1, 20, 0);
     final end = DateTime(now.year, now.month, now.day, 10, 0);
+
+    if (kDebugMode) {
+      print("Fetching sleep from $start to $end");
+      print("Sleep types: $_sleepTypes");
+    }
 
     try {
       final data = await _health.getHealthDataFromTypes(
@@ -121,68 +109,27 @@ class HealthRepository {
         endTime: end,
         types: _sleepTypes,
       );
+
       final uniqueData = _health.removeDuplicates(data);
 
-      double light = 0;
-      double deep = 0;
-      double rem = 0;
-      double asleep = 0; // fallback for platforms without stage detail
+      if (kDebugMode) print("Unique data points: ${uniqueData.length}");
+
       Duration totalSleep = Duration.zero;
 
-      for (var point in uniqueData) {
+      for (final point in uniqueData) {
+        if (point.type == HealthDataType.SLEEP_AWAKE) continue;
+
         final duration = point.dateTo.difference(point.dateFrom);
-        final hours = duration.inMinutes / 60.0;
 
-        switch (point.type) {
-          case HealthDataType.SLEEP_LIGHT:
-            light += hours;
-            totalSleep += duration; // only count stages, not summaries
-            break;
-          case HealthDataType.SLEEP_DEEP:
-            deep += hours;
-            totalSleep += duration;
-            break;
-          case HealthDataType.SLEEP_REM:
-            rem += hours;
-            totalSleep += duration;
-            break;
-          case HealthDataType.SLEEP_ASLEEP:
-            asleep += hours; // used as fallback below
-            break;
-          default:
-            break; // skip SLEEP_IN_BED and other summary types
-        }
+        totalSleep += duration;
       }
 
-      // If no stage detail was available, fall back to SLEEP_ASLEEP total
-      final bool hasStageData = light > 0 || deep > 0 || rem > 0;
-      if (!hasStageData && asleep > 0) {
-        totalSleep = Duration(minutes: (asleep * 60).round());
-      }
+      if (kDebugMode) print("Total sleep: ${totalSleep.inMinutes} minutes");
 
-      if (kDebugMode) {
-        print(
-          "Sleep zones — Light: $light, Deep: $deep, REM: $rem, Asleep fallback: $asleep",
-        );
-        print("Total sleep: ${totalSleep.inMinutes} minutes");
-      }
-
-      return Sleep(
-        totalDuration: totalSleep,
-        lightHours: light,
-        deepHours: deep,
-        remHours: rem,
-        dateChecked: now,
-      );
+      return Sleep(totalDuration: totalSleep, dateChecked: now);
     } catch (e) {
       if (kDebugMode) print("Error fetching sleep data: $e");
-      return Sleep(
-        totalDuration: Duration.zero,
-        lightHours: 0,
-        deepHours: 0,
-        remHours: 0,
-        dateChecked: now,
-      );
+      return Sleep(totalDuration: Duration.zero, dateChecked: now);
     }
   }
 }
