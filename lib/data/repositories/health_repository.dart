@@ -43,13 +43,18 @@ class HealthRepository {
     final midnight = DateTime(now.year, now.month, now.day);
 
     final stepsOrNull = await _health.getTotalStepsInInterval(midnight, now);
+    final steps = stepsOrNull ?? 0;
 
-    return stepsOrNull ?? 0;
+    if (kDebugMode) print("Steps today: $steps");
+
+    return steps;
   }
 
   Future<List<HeartRate>> getHeartRateList() async {
     final now = DateTime.now();
     final start = now.subtract(const Duration(minutes: 16));
+
+    if (kDebugMode) print("Fetching heart rate from $start to $now");
 
     try {
       List<HealthDataPoint> data = await _health.getHealthDataFromTypes(
@@ -59,6 +64,13 @@ class HealthRepository {
       );
 
       final uniqueData = _health.removeDuplicates(data);
+
+      if (kDebugMode) {
+        print("Heart rate data points: ${uniqueData.length}");
+        for (final point in uniqueData) {
+          print("  ${point.dateFrom} | value: ${point.value}");
+        }
+      }
 
       return uniqueData
           .map((point) => HeartRate.fromHealthPoint(point))
@@ -73,6 +85,8 @@ class HealthRepository {
     final now = DateTime.now();
     final start = now.subtract(const Duration(minutes: 20));
 
+    if (kDebugMode) print("Fetching HRV from $start to $now");
+
     try {
       final data = await _health.getHealthDataFromTypes(
         startTime: start,
@@ -82,7 +96,12 @@ class HealthRepository {
 
       final uniqueData = _health.removeDuplicates(data);
 
-      if (kDebugMode) print(uniqueData);
+      if (kDebugMode) {
+        print("HRV data points: ${uniqueData.length}");
+        for (final point in uniqueData) {
+          print("  ${point.dateFrom} | value: ${point.value}");
+        }
+      }
 
       return uniqueData.map((point) {
         return HeartRateVariabilityRate.fromHealthData(point);
@@ -112,7 +131,7 @@ class HealthRepository {
 
       final uniqueData = _health.removeDuplicates(data);
 
-      if (kDebugMode) print("Unique data points: ${uniqueData.length}");
+      if (kDebugMode) print("Unique sleep data points: ${uniqueData.length}");
 
       Duration totalSleep = Duration.zero;
 
@@ -120,7 +139,6 @@ class HealthRepository {
         if (point.type == HealthDataType.SLEEP_AWAKE) continue;
 
         final duration = point.dateTo.difference(point.dateFrom);
-
         totalSleep += duration;
       }
 

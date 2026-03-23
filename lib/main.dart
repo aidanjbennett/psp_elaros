@@ -9,6 +9,7 @@ import 'package:psp_elaros/services/notification_service.dart';
 import 'package:psp_elaros/style/app_style.dart';
 import 'package:workmanager/workmanager.dart';
 import 'background/steps_sync_task.dart';
+import 'package:psp_elaros/data/models/sleep_model.dart';
 
 Future<void> _registerBackgroundTask() async {
   await Workmanager().initialize(stepSyncTaskCallbackDispatcher);
@@ -49,25 +50,12 @@ void main() async {
   final healthRepo = HealthRepository();
   await healthRepo.requestPermissions();
 
-  // Heart rate
-
-  // print("Heart rate Variability Rate");
-  // List<HeartRateVariabilityRate> heartRateVData = await healthRepo
-  //     .getHeartRateVariabilityRate();
-
-  // for (HeartRateVariabilityRate data in heartRateVData) {
-  //   if (kDebugMode) {
-  //     print(data.value);
-  //   }
-  // }
-
-  List<HeartRate> heartRateData = await healthRepo.getHeartRateList();
-
-  for (HeartRate data in heartRateData) {
-    if (kDebugMode) {
-      print(data.value);
-    }
-  }
+  await Future.wait([
+    healthRepo.getLastNightSleep(),
+    healthRepo.getSteps(),
+    healthRepo.getHeartRateVariabilityRate(),
+    healthRepo.getHeartRateList(),
+  ]);
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
