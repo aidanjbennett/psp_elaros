@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:health/health.dart';
+import 'package:psp_elaros/data/local/database.dart' as db;
 import 'package:psp_elaros/data/models/heart_metrics_model.dart';
 import 'package:psp_elaros/data/models/heart_rate_data_model.dart';
 import 'package:psp_elaros/data/models/heart_rate_variability_rate_model.dart';
@@ -9,6 +11,9 @@ import 'package:psp_elaros/data/models/sleep_model.dart';
 
 class HealthRepository {
   final Health _health = Health();
+  final db.AppDatabase _db;
+
+  HealthRepository({required db.AppDatabase database}) : _db = database;
 
   HealthDataType get _hrvType => Platform.isIOS
       ? HealthDataType.HEART_RATE_VARIABILITY_SDNN
@@ -183,5 +188,157 @@ class HealthRepository {
       averageHeartRate: avgHeartRate,
       averageHrv: avgHrv,
     );
+  }
+
+  // ----------------------------
+  // INSERT: SLEEP
+  // ----------------------------
+  Future<void> saveSleep(Sleep sleep) async {
+    await _db.transaction(() async {
+      final now = DateTime.now();
+      final startTime = now.subtract(sleep.totalDuration);
+
+      await _db
+          .into(_db.sleep)
+          .insertOnConflictUpdate(
+            db.SleepCompanion(startTime: Value(startTime), endTime: Value(now)),
+          );
+    });
+  }
+
+  // ----------------------------
+  // INSERT: STEPS
+  // ----------------------------
+  Future<void> saveSteps(int steps) async {
+    await _db.transaction(() async {
+      final now = DateTime.now();
+      final timestamp = DateTime(now.year, now.month, now.day);
+
+      await _db
+          .into(_db.timestamps)
+          .insertOnConflictUpdate(
+            db.TimestampsCompanion(
+              time: Value(timestamp),
+              date: Value(timestamp),
+            ),
+          );
+
+      await _db
+          .into(_db.steps)
+          .insertOnConflictUpdate(
+            db.StepsCompanion(timestamp: Value(timestamp), steps: Value(steps)),
+          );
+    });
+  }
+
+  // ----------------------------
+  // INSERT: HEART METRICS
+  // ----------------------------
+  Future<void> saveHeartMetrics(HeartMetrics metrics) async {
+    await _db.transaction(() async {
+      final zoneId = await _db
+          .into(_db.heartRateZones)
+          .insertOnConflictUpdate(
+            db.HeartRateZonesCompanion(
+              restingLower: const Value(50),
+              restingUpper: const Value(70),
+              exerciseLower: const Value(70),
+              exerciseHigher: const Value(140),
+              exertionLower: const Value(140),
+              exertionUpper: const Value(180),
+            ),
+          );
+
+      for (final hr in metrics.heartRates) {
+        final timestamp = hr.timestamp;
+
+        await _db
+            .into(_db.timestamps)
+            .insertOnConflictUpdate(
+              db.TimestampsCompanion(
+                time: Value(timestamp),
+                date: Value(timestamp),
+              ),
+            );
+
+        await _db
+            .into(_db.heartRate)
+            .insertOnConflictUpdate(
+              db.HeartRateCompanion(
+                timestamp: Value(timestamp),
+                dailyAvg: Value(hr.value.round()),
+                hrZone: Value(zoneId),
+              ),
+            );
+      }
+
+      if (metrics.averageHrv != null) {
+        for (final hrv in metrics.hrvRates) {
+          final timestamp = hrv.dateFrom;
+
+          await _db
+              .into(_db.timestamps)
+              .insertOnConflictUpdate(
+                db.TimestampsCompanion(
+                  time: Value(timestamp),
+                  date: Value(timestamp),
+                ),
+              );
+
+          await _db
+              .into(_db.hrv)
+              .insertOnConflictUpdate(
+                db.HrvCompanion(
+                  hrv: Value(hrv.value.round()),
+                  timestamp: Value(timestamp),
+                ),
+              );
+        }
+      }
+    });
+  }
+
+  // ----------------------------
+  // INSERT: BASELINE
+  // ----------------------------
+  Future<void> saveBaseline({
+    required int maxHr,
+    required DateTime minHrDate,
+    required int maxHrv,
+  }) async {
+    await _db.transaction(() async {
+      await _db
+          .into(_db.baseline)
+          .insertOnConflictUpdate(
+            db.BaselineCompanion(
+              maxHr: Value(maxHr),
+              minHrDate: Value(minHrDate),
+              maxHrv: Value(maxHrv),
+            ),
+          );
+    });
+  }
+
+  // ----------------------------
+  // INSERT: HEALTH OVERVIEW
+  // ----------------------------
+  Future<void> saveHealthOverview({
+    required int sleepId,
+    required int stepsId,
+    required int hrvValue,
+    required int baselineId,
+  }) async {
+    await _db.transaction(() async {
+      await _db
+          .into(_db.healthOverview)
+          .insertOnConflictUpdate(
+            db.HealthOverviewCompanion(
+              sleepId: Value(sleepId),
+              stepsId: Value(stepsId),
+              hrv: Value(hrvValue),
+              baselineId: Value(baselineId),
+            ),
+          );
+    });
   }
 }

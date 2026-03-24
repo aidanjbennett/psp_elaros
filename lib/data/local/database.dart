@@ -51,8 +51,7 @@ class Notifications extends Table with LastModified {
   IntColumn get notificationId => integer().autoIncrement()();
   TextColumn get notifHeader => text()();
   TextColumn get notifBody => text()();
-  DateTimeColumn get timestamp =>
-      dateTime().references(Timestamps, #time)();
+  DateTimeColumn get timestamp => dateTime().references(Timestamps, #time)();
 }
 
 /// ----------------------------
@@ -69,8 +68,7 @@ class Sleep extends Table with LastModified {
 /// ----------------------------
 class Steps extends Table with LastModified {
   IntColumn get stepsId => integer().autoIncrement()();
-  DateTimeColumn get timestamp =>
-      dateTime().references(Timestamps, #time)();
+  DateTimeColumn get timestamp => dateTime().references(Timestamps, #time)();
   IntColumn get steps => integer()();
 }
 
@@ -79,8 +77,7 @@ class Steps extends Table with LastModified {
 /// ----------------------------
 class Hrv extends Table with LastModified {
   IntColumn get hrv => integer()();
-  DateTimeColumn get timestamp =>
-      dateTime().references(Timestamps, #time)();
+  DateTimeColumn get timestamp => dateTime().references(Timestamps, #time)();
 
   @override
   Set<Column> get primaryKey => {hrv};
@@ -104,11 +101,9 @@ class HeartRateZones extends Table with LastModified {
 /// ----------------------------
 class HeartRate extends Table with LastModified {
   IntColumn get hrId => integer().autoIncrement()();
-  DateTimeColumn get timestamp =>
-      dateTime().references(Timestamps, #time)();
+  DateTimeColumn get timestamp => dateTime().references(Timestamps, #time)();
   IntColumn get dailyAvg => integer()();
-  IntColumn get hrZone =>
-      integer().references(HeartRateZones, #hrZoneId)();
+  IntColumn get hrZone => integer().references(HeartRateZones, #hrZoneId)();
 }
 
 /// ----------------------------
@@ -126,23 +121,12 @@ class Baseline extends Table with LastModified {
 /// ----------------------------
 class HealthOverview extends Table with LastModified {
   IntColumn get healthScore => integer().autoIncrement()();
-
-  IntColumn get sleepId =>
-      integer().references(Sleep, #sleepId)();
-
-  IntColumn get stepsId =>
-      integer().references(Steps, #stepsId)();
-
-  IntColumn get hrv =>
-      integer().references(Hrv, #hrv)();
-
-  IntColumn get baselineId =>
-      integer().references(Baseline, #baselineId)();
+  IntColumn get sleepId => integer().references(Sleep, #sleepId)();
+  IntColumn get stepsId => integer().references(Steps, #stepsId)();
+  IntColumn get hrv => integer().references(Hrv, #hrv)();
+  IntColumn get baselineId => integer().references(Baseline, #baselineId)();
 }
 
-/// ----------------------------
-/// DATABASE
-/// ----------------------------
 @DriftDatabase(
   tables: [
     Timestamps,
@@ -161,38 +145,10 @@ class HealthOverview extends Table with LastModified {
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
-  @override
-  int get schemaVersion => 3;
+  AppDatabase.forTesting(super.connection);
 
   @override
-  MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (m) async {
-      await m.createAll();
-    },
-    onUpgrade: (m, from, to) async {
-      if (from < 3) {
-        await _migrateToV3(m);
-      }
-    },
-  );
-
-  /// ----------------------------
-  /// VERSION 3 MIGRATION
-  /// ----------------------------
-  Future<void> _migrateToV3(Migrator m) async {
-    // Create new tables
-    await m.createTable(settings);
-    await m.createTable(userInfo);
-    await m.createTable(heartRateZones);
-
-    // Add missing columns
-    await m.addColumn(steps, steps.steps);
-    await m.addColumn(hrv, hrv.hrv);
-    await m.addColumn(heartRate, heartRate.hrZone);
-
-    await m.addColumn(baseline, baseline.minHrDate);
-    await m.addColumn(baseline, baseline.maxHrv);
-  }
+  int get schemaVersion => 1;
 }
 
 /// ----------------------------
