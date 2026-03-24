@@ -50,12 +50,11 @@ void main() async {
   final healthRepo = HealthRepository();
   await healthRepo.requestPermissions();
 
-  await Future.wait([
-    healthRepo.getLastNightSleep(),
-    healthRepo.getSteps(),
-    healthRepo.getHeartRateVariabilityRate(),
-    healthRepo.getHeartRateList(),
-  ]);
+  // await Future.wait([
+  //   healthRepo.getLastNightSleep(),
+  //   healthRepo.getSteps(),
+  //   healthRepo.getHeartMetrics(),
+  // ]);
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
