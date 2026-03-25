@@ -27,7 +27,7 @@ DateTime? _getStartDate(ExportRange range) {
     case ExportRange.last30Days:
       return now.subtract(const Duration(days: 30));
     case ExportRange.last3Months:
-      return DateTime(now.year, now.month - 3, now.day);
+      return now.subtract(const Duration(days: 90));
     case ExportRange.allTime:
       return null;
   }
