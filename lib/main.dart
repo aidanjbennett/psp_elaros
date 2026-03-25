@@ -6,14 +6,10 @@ import 'package:psp_elaros/router/app_router.dart';
 import 'package:psp_elaros/services/notification_service.dart';
 import 'package:psp_elaros/style/app_style.dart';
 
-Future<void> _registerBackgroundTask() async {}
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final database = db.AppDatabase();
-
-  await _registerBackgroundTask();
 
   await NotificationService.init();
 
