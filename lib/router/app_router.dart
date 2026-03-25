@@ -48,7 +48,7 @@ final router = GoRouter(
                 routes: [
                   GoRoute(
                     path: '/goals',
-                    builder: (context, state) => const GoalsScreen(),
+                    builder: (context, state) => GoalsScreen(),
                   )
                 ]
             ),

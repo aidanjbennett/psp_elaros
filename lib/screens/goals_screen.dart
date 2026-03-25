@@ -1,15 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:psp_elaros/data/models/goals/goals.dart';
+import 'package:psp_elaros/data/models/goals/recurrence_type.dart';
+import 'package:psp_elaros/data/models/goals/recurring_goal.dart';
 import 'package:psp_elaros/style/app_style.dart';
+import 'package:psp_elaros/widgets/goals/goal_overview_widget.dart';
 
 class GoalsScreen extends StatelessWidget {
-  const GoalsScreen({super.key});
+  GoalsScreen({super.key});
+
+  final List<Goal> dummyGoals = [
+    OneTimeGoal(
+      title: 'Weekly Step Goal',
+      currentProgress: 7001,
+      progressGoal: 10000,
+      endDate: DateTime(2026, 3, 26), // 2 days from now
+      metricCategory: MetricCategory.steps,
+    ),
+    OneTimeGoal(
+      title: 'Daily Sleep Goal',
+      currentProgress: 6,
+      progressGoal: 8,
+      endDate: DateTime(2026, 3, 25), // 1 day from now
+      metricCategory: MetricCategory.sleep,
+    ),
+    RecurringGoal(
+      title: 'Another sleep goal',
+      currentProgress: 6,
+      progressGoal: 8,
+      recurrenceType: RecurrenceType.weekly,
+      repeatStart: DateTime(2026, 3, 24),
+      metricCategory: MetricCategory.sleep,
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Bettertrack"),
+        title: const Text("BetterTrack"),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -29,7 +58,10 @@ class GoalsScreen extends StatelessWidget {
               "Your Goals",
               style: Theme.of(context).textTheme.titleLarge,
             ),
+            const SizedBox(height: 16),
+            ...dummyGoals.map((goal) => GoalOverviewWidget(goalModel: goal)).toList(),
           ],
+
         ),
       ),
 

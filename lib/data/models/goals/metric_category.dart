@@ -1,0 +1,1 @@
+enum MetricCategory { steps, sleep }
