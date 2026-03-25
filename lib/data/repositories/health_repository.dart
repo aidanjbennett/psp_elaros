@@ -58,7 +58,7 @@ class HealthRepository {
 
   Future<List<HeartRate>> getHeartRateList() async {
     final now = DateTime.now();
-    final start = now.subtract(const Duration(hours: 2));
+    final start = now.subtract(const Duration(hours: 24));
 
     if (kDebugMode) print("Fetching heart rate from $start to $now");
 
