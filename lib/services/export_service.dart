@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+
 import 'package:drift/drift.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -54,6 +55,7 @@ class ExportService {
     }
   }
 
+
   // fetch the data
   Future<Map<String, List<Map<String, dynamic>>>> _fetchData(
       ExportRange range) async {
@@ -77,6 +79,7 @@ class ExportService {
       hrQuery.where((t) => t.timestamp.isBiggerOrEqualValue(startDate));
     }
 
+
     final steps = await stepsQuery.get();
     final sleep = await sleepQuery.get();
     final heartRate = await hrQuery.get();
@@ -87,6 +90,7 @@ class ExportService {
       "heartRate": heartRate.map((e) => e.toJson()).toList(),
     };
   }
+
 
   // json
   Future<File> exportJson(ExportRange range) async {
@@ -102,6 +106,7 @@ class ExportService {
     await _shareIfNeeded(file);
     return file;
   }
+
 
   // csv
   Future<File> exportCsv(ExportRange range) async {
@@ -141,6 +146,8 @@ class ExportService {
     await _shareIfNeeded(file);
     return file;
   }
+
+
 
   // pdf
   Future<File> exportPdf(ExportRange range) async {
@@ -358,3 +365,5 @@ class ExportService {
     }
   }
 }
+
+
