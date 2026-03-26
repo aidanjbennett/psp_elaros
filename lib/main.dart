@@ -1,73 +1,75 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:psp_elaros/background/sleep_sync_task.dart';
-import 'package:psp_elaros/data/models/heart_rate_data_model.dart';
+import 'package:psp_elaros/data/local/database.dart' as db;
+import 'package:psp_elaros/data/models/heart_metrics_model.dart';
+import 'package:psp_elaros/data/models/sleep_model.dart';
 import 'package:psp_elaros/data/repositories/health_repository.dart';
 import 'package:flutter/services.dart';
 import 'package:psp_elaros/router/app_router.dart';
+import 'package:psp_elaros/services/heart_rate_service.dart';
 import 'package:psp_elaros/services/notification_service.dart';
 import 'package:psp_elaros/style/app_style.dart';
 import 'package:workmanager/workmanager.dart';
-import 'background/steps_sync_task.dart';
+import 'dart:io';
 
-Future<void> _registerBackgroundTask() async {
-  await Workmanager().initialize(stepSyncTaskCallbackDispatcher);
+@pragma('vm:entry-point')
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    try {
+      final database = db.AppDatabase();
+      final healthRepo = HealthRepository(database: database);
 
-  // Step Task
-  await Workmanager().registerPeriodicTask(
-    'step-sync-task',
-    StepSyncTask.taskName,
-    frequency: const Duration(minutes: 15),
-    constraints: Constraints(
-      networkType: NetworkType.notRequired,
-      requiresBatteryNotLow: false,
-    ),
-    existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
-  );
+      // Steps
+      int steps = await healthRepo.getSteps();
+      await healthRepo.saveSteps(steps);
 
-  // Get Sleep Task
+      // Heart Rate and HRV
+      HeartMetrics heartMetrics = await healthRepo.getHeartMetrics();
+      await healthRepo.saveHeartMetrics(heartMetrics);
 
-  await Workmanager().registerPeriodicTask(
-    'sleep-sync-task',
-    SleepSyncTask.taskName,
-    frequency: const Duration(hours: 24),
-    constraints: Constraints(
-      networkType: NetworkType.notRequired,
-      requiresBatteryNotLow: false,
-    ),
-    existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
-  );
+      // Sleep
+      Sleep sleepData = await healthRepo.getLastNightSleep();
+      await healthRepo.saveSleep(sleepData);
+
+      // iOS Workaround (Manual Re-scheduling)
+      if (Platform.isIOS) {
+        Workmanager().registerOneOffTask(
+          "daily-health-sync",
+          "syncHealthDataTask",
+          initialDelay: const Duration(minutes: 15),
+        );
+      }
+
+      await database.close();
+      return Future.value(true);
+    } catch (e) {
+      if (kDebugMode) print("Background Task Failed: $e");
+      return Future.value(false);
+    }
+  });
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // await _registerBackgroundTask();
+  await Workmanager().initialize(callbackDispatcher, isInDebugMode: kDebugMode);
+
+  // Use Periodic Task for 24-hour intervals
+  await Workmanager().registerPeriodicTask(
+    "daily-health-sync", // Unique Name
+    "syncHealthDataTask", // Task Name
+    frequency: const Duration(minutes: 15),
+    constraints: Constraints(
+      requiresBatteryNotLow: true, // Save battery life
+    ),
+  );
+
+  final database = db.AppDatabase();
 
   await NotificationService.init();
 
-  final healthRepo = HealthRepository();
+  final healthRepo = HealthRepository(database: database);
   await healthRepo.requestPermissions();
-
-  // Heart rate
-
-  // print("Heart rate Variability Rate");
-  // List<HeartRateVariabilityRate> heartRateVData = await healthRepo
-  //     .getHeartRateVariabilityRate();
-
-  // for (HeartRateVariabilityRate data in heartRateVData) {
-  //   if (kDebugMode) {
-  //     print(data.value);
-  //   }
-  // }
-
-  List<HeartRate> heartRateData = await healthRepo.getHeartRateList();
-
-  for (HeartRate data in heartRateData) {
-    if (kDebugMode) {
-      print(data.value);
-    }
-  }
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
