@@ -73,9 +73,9 @@ class HealthRepository {
 
       if (kDebugMode) {
         print("Heart rate data points: ${uniqueData.length}");
-        for (final point in uniqueData) {
-          print("  ${point.dateFrom} | value: ${point.value}");
-        }
+        // for (final point in uniqueData) {
+        //   // print("  ${point.dateFrom} | value: ${point.value}");
+        // }
       }
 
       return uniqueData
@@ -104,9 +104,9 @@ class HealthRepository {
 
       if (kDebugMode) {
         print("HRV data points: ${uniqueData.length}");
-        for (final point in uniqueData) {
-          print("  ${point.dateFrom} | value: ${point.value}");
-        }
+        // for (final point in uniqueData) {
+        //   // print("  ${point.dateFrom} | value: ${point.value}");
+        // }
       }
 
       return uniqueData.map((point) {
