@@ -8,32 +8,9 @@ import 'package:psp_elaros/widgets/goals/add_goal_form.dart';
 import 'package:psp_elaros/widgets/goals/goal_overview_widget.dart';
 
 class GoalsScreen extends StatelessWidget {
-  GoalsScreen({super.key});
+  final AppDatabase db;
 
-  final List<Goal> dummyGoals = [
-    OneTimeGoal(
-      title: 'Weekly Step Goal',
-      currentProgress: 7001,
-      progressGoal: 10000,
-      endDate: DateTime(2026, 3, 26), // 2 days from now
-      metricCategory: MetricCategory.steps,
-    ),
-    OneTimeGoal(
-      title: 'Daily Sleep Goal',
-      currentProgress: 6,
-      progressGoal: 8,
-      endDate: DateTime(2026, 3, 25), // 1 day from now
-      metricCategory: MetricCategory.sleep,
-    ),
-    RecurringGoal(
-      title: 'Another sleep goal',
-      currentProgress: 6,
-      progressGoal: 8,
-      recurrenceType: RecurrenceType.weekly,
-      repeatStart: DateTime(2026, 3, 24),
-      metricCategory: MetricCategory.sleep,
-    ),
-  ];
+  const GoalsScreen({super.key, required this.db});
 
   @override
   Widget build(BuildContext context) {
@@ -106,9 +83,41 @@ class GoalsScreen extends StatelessWidget {
                 ),
               ),
             ),
-          ],
-        ),
+             Expanded(
+            child: StreamBuilder(
+              stream: db.select(db.goals).watch(),
+              builder: (context, AsyncSnapshot<List<Goal>> snapshot) {
+                if (!snapshot.hasData) {
+                  return const CircularProgressIndicator();
+                }
+
+                final goals = snapshot.data!;
+
+                if (goals.isEmpty) {
+                  return const Text("No goals yet");
+                }
+
+                return ListView.builder(
+                  itemCount: goals.length,
+                  itemBuilder: (context, index) {
+                    final goal = goals[index];
+
+                    return ListTile(
+                      title: Text(goal.title),
+                      trailing: Icon(
+                        goal.completed
+                            ? Icons.check_circle
+                            : Icons.circle_outlined,
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 }
+

@@ -115,6 +115,13 @@ class Baseline extends Table with LastModified {
   DateTimeColumn get minHrDate => dateTime()();
   IntColumn get maxHrv => integer()();
 }
+// Goals screen 
+class Goals extends Table with LastModified {
+  IntColumn get goalId => integer().autoIncrement()();
+  TextColumn get title => text()();
+  BoolColumn get completed => boolean().withDefault(const Constant(false))();
+}
+
 
 /// ----------------------------
 /// HEALTH OVERVIEW
@@ -140,6 +147,7 @@ class HealthOverview extends Table with LastModified {
     HeartRate,
     Baseline,
     HealthOverview,
+    Goals,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -161,3 +169,5 @@ LazyDatabase _openConnection() {
     return NativeDatabase(file);
   });
 }
+
+

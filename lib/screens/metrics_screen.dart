@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:psp_elaros/services/hrv_service.dart';
 import 'package:psp_elaros/style/app_style.dart';
 
+late final AppDatabase db;
+
+
 class MetricsScreen extends StatefulWidget {
   const MetricsScreen({super.key});
 
@@ -20,7 +23,7 @@ class _MetricsScreenState extends State<MetricsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadMetrics();
+    db = widget.database;
   }
 
   Future<void> _loadMetrics() async {
@@ -112,20 +115,44 @@ class _MetricsScreenState extends State<MetricsScreen> {
                         ),
                       ),
                       const SizedBox(width: 5),
-                      _loading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(
-                              _hrv,
-                              style: const TextStyle(
-                                fontSize: 26,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
-                              ),
-                            ),
+                      StreamBuilder<List<HrvData>>(
+  stream: (db.select(db.hrv)
+        ..where((tbl) =>
+            tbl.timestamp.isBiggerOrEqualValue(
+              DateTime.now().subtract(const Duration(days: 1)),
+            )))
+      .watch(),
+  builder: (context, snapshot) {
+    if (!snapshot.hasData) {
+      return const SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+
+    final data = snapshot.data!;
+
+    if (data.isEmpty) {
+      return const Text(
+        '-- ms',
+        style: TextStyle(fontSize: 26, fontWeight: FontWeight.w600),
+      );
+    }
+
+    final avg =
+        data.map((e) => e.hrv).reduce((a, b) => a + b) ~/ data.length;
+
+    return Text(
+      '$avg ms',
+      style: const TextStyle(
+        fontSize: 26,
+        fontWeight: FontWeight.w600,
+        color: Colors.black87,
+      ),
+    );
+  },
+)
                       const SizedBox(width: 10),
                       Text(
                         _goodHrvStatus ? 'Good HRV' : 'Bad HRV',
