@@ -6,7 +6,7 @@ import 'package:drift/drift.dart';
 import 'package:path_provider/path_provider.dart';
 // import 'package:permission_handler/permission_handler.dart';
 // import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
+import 'lib/widgets' as pw;
 // import 'package:share_plus/share_plus.dart';
 
 import '../data/local/database.dart';

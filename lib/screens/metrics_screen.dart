@@ -1,11 +1,11 @@
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:psp_elaros/data/local/db_instance.dart';
 import 'package:psp_elaros/services/hrv_service.dart';
 import 'package:psp_elaros/style/app_style.dart';
 
 import '../data/local/database.dart';
-import '../data/local/db_instance.dart';
 
 late final AppDatabase db;
 
