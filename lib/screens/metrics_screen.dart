@@ -66,6 +66,12 @@ class _MetricsScreenState extends State<MetricsScreen> {
                 children: [
                   Row(
                     children: [
+                      CircleAvatar(
+                        radius: 24,
+                        backgroundColor: Colors.pinkAccent,
+                        child: Icon(Icons.monitor_heart, color: Colors.white),
+                      ),
+                      SizedBox(width: 12),
                       const Text(
                         "Heart Rate",
                         style: TextStyle(
@@ -75,8 +81,14 @@ class _MetricsScreenState extends State<MetricsScreen> {
                         ),
                       ),
                       const Spacer(),
-                      const Text("Status", style: TextStyle(fontSize: 18)),
+                      const Text("Status", style: TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.w600)),
                       const SizedBox(width: 10),
+                      SizedBox(width: 12),
+                      CircleAvatar(
+                        radius: 18,
+                        backgroundColor: Colors.deepOrangeAccent,
+                        child: Icon(Icons.error_outline, color: Colors.white, size: 24),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -85,7 +97,7 @@ class _MetricsScreenState extends State<MetricsScreen> {
                       const Text(
                         "HRV:",
                         style: TextStyle(
-                          fontSize: 26,
+                          fontSize: 22,
                           fontWeight: FontWeight.w600,
                           color: Colors.black87,
                         ),
@@ -167,7 +179,11 @@ class _MetricsScreenState extends State<MetricsScreen> {
                   const SizedBox(height: 10),
                   Row(
                     children: const [
-                      Icon(Icons.location_searching, color: Colors.white),
+                      CircleAvatar(
+                        radius: 24,
+                        backgroundColor: Colors.yellow,
+                        child: Icon(Icons.location_searching, color: Colors.white),
+                      ),
                       SizedBox(width: 12),
                       Text(
                         "Goals",
@@ -199,7 +215,11 @@ class _MetricsScreenState extends State<MetricsScreen> {
                   const SizedBox(height: 10),
                   Row(
                     children: const [
-                      Icon(Icons.directions_walk, color: Colors.white),
+                      CircleAvatar(
+                        radius: 24,
+                        backgroundColor: Colors.lightBlue,
+                        child: Icon(Icons.directions_walk, color: Colors.white),
+                      ),
                       SizedBox(width: 12),
                       Text(
                         "Steps",
