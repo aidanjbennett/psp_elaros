@@ -18,15 +18,45 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final router = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/dashboard',
-  routes: [
-    StatefulShellRoute.indexedStack(
-      builder: (context, state, navigationShell) {
-        return DashboardShell(navigationShell: navigationShell);
-      },
-      branches: [
-        // Metrics branch
-        StatefulShellBranch(
+    initialLocation: '/dashboard',
+    routes: [
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return DashboardShell(navigationShell: navigationShell);
+        },
+          branches: [
+            // Metrics branch
+            StatefulShellBranch(
+                routes: [
+                  GoRoute(
+                      path: '/dashboard',
+                    builder: (context, state) => const MetricsScreen(),
+                  )
+                ]
+            ),
+            // Goals branch
+            StatefulShellBranch(
+                routes: [
+                  GoRoute(
+                      path: '/trends',
+                    builder: (context, state) => const MetricsScreen(),
+                  )
+                ]
+            ),
+            StatefulShellBranch(
+                routes: [
+                  GoRoute(
+                    path: '/goals',
+                    builder: (context, state) => GoalsScreen(),
+                  )
+                ]
+            ),
+          ]
+      ),
+      GoRoute(
+          path: '/settings',
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) => const RootSettings(),
           routes: [
             GoRoute(
               path: '/dashboard',
