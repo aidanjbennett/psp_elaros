@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:psp_elaros/data/local/database.dart';
 import 'package:psp_elaros/data/models/goals/goals.dart';
 import 'package:psp_elaros/data/models/goals/recurrence_type.dart';
 import 'package:psp_elaros/data/models/goals/recurring_goal.dart';
@@ -34,9 +35,10 @@ class GoalsScreen extends StatelessWidget {
           children: [
             Text("Your Goals", style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 16),
-            ...dummyGoals
-                .map((goal) => GoalOverviewWidget(goalModel: goal))
-                .toList(),
+            // Needs implementing
+            // ...dummyGoals
+            //     .map((goal) => GoalOverviewWidget(goalModel: goal))
+            //     .toList(),
             Card(
               elevation: 1,
               clipBehavior: Clip.antiAlias,
@@ -47,9 +49,12 @@ class GoalsScreen extends StatelessWidget {
                 onTap: () {
                   showModalBottomSheet(
                     context: context,
-                    isScrollControlled: true, // CRITICAL: Allows the sheet to move up with the keyboard
+                    isScrollControlled:
+                        true, // CRITICAL: Allows the sheet to move up with the keyboard
                     shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
                     ),
                     builder: (context) {
                       // Return your custom form widget here
@@ -83,41 +88,41 @@ class GoalsScreen extends StatelessWidget {
                 ),
               ),
             ),
-             Expanded(
-            child: StreamBuilder(
-              stream: db.select(db.goals).watch(),
-              builder: (context, AsyncSnapshot<List<Goal>> snapshot) {
-                if (!snapshot.hasData) {
-                  return const CircularProgressIndicator();
-                }
+            //   Expanded(
+            //   child: StreamBuilder(
+            //     stream: db.select(db.goals).watch(),
+            //     builder: (context, AsyncSnapshot<List<Goal>> snapshot) {
+            //       if (!snapshot.hasData) {
+            //         return const CircularProgressIndicator();
+            //       }
 
-                final goals = snapshot.data!;
+            //       final goals = snapshot.data!;
 
-                if (goals.isEmpty) {
-                  return const Text("No goals yet");
-                }
+            //       if (goals.isEmpty) {
+            //         return const Text("No goals yet");
+            //       }
 
-                return ListView.builder(
-                  itemCount: goals.length,
-                  itemBuilder: (context, index) {
-                    final goal = goals[index];
+            //       return ListView.builder(
+            //         itemCount: goals.length,
+            //         itemBuilder: (context, index) {
+            //           final goal = goals[index];
 
-                    return ListTile(
-                      title: Text(goal.title),
-                      trailing: Icon(
-                        goal.completed
-                            ? Icons.check_circle
-                            : Icons.circle_outlined,
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-        ],
+            //           return ListTile(
+            //             title: Text(goal.title),
+            //             trailing: Icon(
+            //               goal.completed
+            //                   ? Icons.check_circle
+            //                   : Icons.circle_outlined,
+            //             ),
+            //           );
+            //         },
+            //       );
+            //     },
+            //   ),
+            // ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
-

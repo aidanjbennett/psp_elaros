@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:psp_elaros/data/local/database.dart';
+import 'package:psp_elaros/data/local/db_instance.dart';
 import 'package:psp_elaros/services/hrv_service.dart';
 import 'package:psp_elaros/style/app_style.dart';
 
 late final AppDatabase db;
-
 
 class MetricsScreen extends StatefulWidget {
   const MetricsScreen({super.key});
@@ -23,7 +24,7 @@ class _MetricsScreenState extends State<MetricsScreen> {
   @override
   void initState() {
     super.initState();
-    db = widget.database;
+    // db = widget.database;
   }
 
   Future<void> _loadMetrics() async {
@@ -93,76 +94,94 @@ class _MetricsScreenState extends State<MetricsScreen> {
                         ),
                       ),
                       const Spacer(),
-                      const Text("Status", style: TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.w600)),
+                      const Text(
+                        "Status",
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       const SizedBox(width: 10),
                       SizedBox(width: 12),
                       CircleAvatar(
                         radius: 18,
                         backgroundColor: Colors.deepOrangeAccent,
-                        child: Icon(Icons.error_outline, color: Colors.white, size: 24),
+                        child: Icon(
+                          Icons.error_outline,
+                          color: Colors.white,
+                          size: 24,
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      const Text(
-                        "HRV:",
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      StreamBuilder<List<HrvData>>(
-  stream: (db.select(db.hrv)
-        ..where((tbl) =>
-            tbl.timestamp.isBiggerOrEqualValue(
-              DateTime.now().subtract(const Duration(days: 1)),
-            )))
-      .watch(),
-  builder: (context, snapshot) {
-    if (!snapshot.hasData) {
-      return const SizedBox(
-        width: 20,
-        height: 20,
-        child: CircularProgressIndicator(strokeWidth: 2),
-      );
-    }
+                  // Row(
+                  //   children: [
+                  //     const Text(
+                  //       "HRV:",
+                  //       style: TextStyle(
+                  //         fontSize: 22,
+                  //         fontWeight: FontWeight.w600,
+                  //         color: Colors.black87,
+                  //       ),
+                  //     ),
+                  //     const SizedBox(width: 5),
+                  //     StreamBuilder<List<HrvData>>(
+                  //       stream:
+                  //           (db.select(db.hrv)..where(
+                  //                 (tbl) => tbl.timestamp.isBiggerOrEqualValue(
+                  //                   DateTime.now().subtract(
+                  //                     const Duration(days: 1),
+                  //                   ),
+                  //                 ),
+                  //               ))
+                  //               .watch(),
+                  //       builder: (context, snapshot) {
+                  //         if (!snapshot.hasData) {
+                  //           return const SizedBox(
+                  //             width: 20,
+                  //             height: 20,
+                  //             child: CircularProgressIndicator(strokeWidth: 2),
+                  //           );
+                  //         }
 
-    final data = snapshot.data!;
+                  //         final data = snapshot.data!;
 
-    if (data.isEmpty) {
-      return const Text(
-        '-- ms',
-        style: TextStyle(fontSize: 26, fontWeight: FontWeight.w600),
-      );
-    }
+                  //         if (data.isEmpty) {
+                  //           return const Text(
+                  //             '-- ms',
+                  //             style: TextStyle(
+                  //               fontSize: 26,
+                  //               fontWeight: FontWeight.w600,
+                  //             ),
+                  //           );
+                  //         }
 
-    final avg =
-        data.map((e) => e.hrv).reduce((a, b) => a + b) ~/ data.length;
+                  //         final avg =
+                  //             data.map((e) => e.hrv).reduce((a, b) => a + b) ~/
+                  //             data.length;
 
-    return Text(
-      '$avg ms',
-      style: const TextStyle(
-        fontSize: 26,
-        fontWeight: FontWeight.w600,
-        color: Colors.black87,
-      ),
-    );
-  },
-)
-                      const SizedBox(width: 10),
-                      Text(
-                        _goodHrvStatus ? 'Good HRV' : 'Bad HRV',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: _goodHrvStatus ? Colors.green : Colors.red,
-                        ),
-                      ),
-                    ],
-                  ),
+                  //         return Text(
+                  //           '$avg ms',
+                  //           style: const TextStyle(
+                  //             fontSize: 26,
+                  //             fontWeight: FontWeight.w600,
+                  //             color: Colors.black87,
+                  //           ),
+                  //         );
+                  //       },
+                  //     ),
+                  //     const SizedBox(width: 10),
+                  //     Text(
+                  //       _goodHrvStatus ? 'Good HRV' : 'Bad HRV',
+                  //       style: TextStyle(
+                  //         fontSize: 18,
+                  //         color: _goodHrvStatus ? Colors.green : Colors.red,
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                   const SizedBox(height: 12),
                   const Text(
                     "Update on the user here",
@@ -221,7 +240,10 @@ class _MetricsScreenState extends State<MetricsScreen> {
                       CircleAvatar(
                         radius: 24,
                         backgroundColor: Colors.yellow,
-                        child: Icon(Icons.location_searching, color: Colors.white),
+                        child: Icon(
+                          Icons.location_searching,
+                          color: Colors.white,
+                        ),
                       ),
                       SizedBox(width: 12),
                       Text(
