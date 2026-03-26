@@ -10,44 +10,11 @@ import 'package:psp_elaros/services/heart_rate_service.dart';
 import 'package:psp_elaros/services/notification_service.dart';
 import 'package:psp_elaros/style/app_style.dart';
 import 'package:workmanager/workmanager.dart';
-import 'dart:io';
+import 'background/steps_sync_task.dart';
+import 'package:psp_elaros/data/models/sleep_model.dart';
 
-@pragma('vm:entry-point')
-void callbackDispatcher() {
-  Workmanager().executeTask((task, inputData) async {
-    try {
-      final database = db.AppDatabase();
-      final healthRepo = HealthRepository(database: database);
-
-      // Steps
-      int steps = await healthRepo.getSteps();
-      await healthRepo.saveSteps(steps);
-
-      // Heart Rate and HRV
-      HeartMetrics heartMetrics = await healthRepo.getHeartMetrics();
-      await healthRepo.saveHeartMetrics(heartMetrics);
-
-      // Sleep
-      Sleep sleepData = await healthRepo.getLastNightSleep();
-      await healthRepo.saveSleep(sleepData);
-
-      // iOS Workaround (Manual Re-scheduling)
-      if (Platform.isIOS) {
-        Workmanager().registerOneOffTask(
-          "daily-health-sync",
-          "syncHealthDataTask",
-          initialDelay: const Duration(minutes: 15),
-        );
-      }
-
-      await database.close();
-      return Future.value(true);
-    } catch (e) {
-      if (kDebugMode) print("Background Task Failed: $e");
-      return Future.value(false);
-    }
-  });
-}
+Future<void> _registerBackgroundTask() async {
+  await Workmanager().initialize(stepSyncTaskCallbackDispatcher);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,6 +37,13 @@ void main() async {
 
   final healthRepo = HealthRepository(database: database);
   await healthRepo.requestPermissions();
+
+  await Future.wait([
+    healthRepo.getLastNightSleep(),
+    healthRepo.getSteps(),
+    healthRepo.getHeartRateVariabilityRate(),
+    healthRepo.getHeartRateList(),
+  ]);
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(

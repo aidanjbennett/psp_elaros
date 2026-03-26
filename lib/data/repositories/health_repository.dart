@@ -35,6 +35,20 @@ class HealthRepository {
     HealthDataType.SLEEP_AWAKE,
   ];
 
+  class HeartMetrics {
+  final List<HeartRate> heartRates;
+  final List<HeartRateVariabilityRate> hrvRates;
+  final double? averageHeartRate;
+  final double? averageHrv;
+
+  HeartMetrics({
+    required this.heartRates,
+    required this.hrvRates,
+    required this.averageHeartRate,
+    required this.averageHrv,
+  });
+};
+
   List<HealthDataType> get _types => [..._baseTypes, _hrvType];
 
   Future<bool> requestPermissions() async {
@@ -58,7 +72,7 @@ class HealthRepository {
 
   Future<List<HeartRate>> getHeartRateList() async {
     final now = DateTime.now();
-    final start = now.subtract(const Duration(hours: 24));
+    final start = now.subtract(const Duration(minutes: 16));
 
     if (kDebugMode) print("Fetching heart rate from $start to $now");
 
@@ -73,9 +87,9 @@ class HealthRepository {
 
       if (kDebugMode) {
         print("Heart rate data points: ${uniqueData.length}");
-        // for (final point in uniqueData) {
-        //   // print("  ${point.dateFrom} | value: ${point.value}");
-        // }
+        for (final point in uniqueData) {
+          print("  ${point.dateFrom} | value: ${point.value}");
+        }
       }
 
       return uniqueData
@@ -93,6 +107,8 @@ class HealthRepository {
 
     if (kDebugMode) print("Fetching HRV from $start to $now");
 
+    if (kDebugMode) print("Fetching HRV from $start to $now");
+
     try {
       final data = await _health.getHealthDataFromTypes(
         startTime: start,
@@ -104,9 +120,9 @@ class HealthRepository {
 
       if (kDebugMode) {
         print("HRV data points: ${uniqueData.length}");
-        // for (final point in uniqueData) {
-        //   // print("  ${point.dateFrom} | value: ${point.value}");
-        // }
+        for (final point in uniqueData) {
+          print("  ${point.dateFrom} | value: ${point.value}");
+        }
       }
 
       return uniqueData.map((point) {
@@ -154,32 +170,6 @@ class HealthRepository {
     } catch (e) {
       if (kDebugMode) print("Error fetching sleep data: $e");
       return Sleep(totalDuration: Duration.zero, dateChecked: now);
-    }
-  }
-
-  Future<HeartMetrics> getHeartMetrics() async {
-    final heartRates = await getHeartRateList();
-    final hrvRates = await getHeartRateVariabilityRate();
-
-    double? avgHeartRate;
-    double? avgHrv;
-
-    if (heartRates.isNotEmpty) {
-      final sum = heartRates.map((e) => e.value).reduce((a, b) => a + b);
-      avgHeartRate = sum / heartRates.length;
-    }
-
-    if (hrvRates.isNotEmpty) {
-      final sum = hrvRates.map((e) => e.value).reduce((a, b) => a + b);
-      avgHrv = sum / hrvRates.length;
-    }
-
-    if (kDebugMode) {
-      print("Heart metrics:");
-      print("  HR count: ${heartRates.length}");
-      print("  HR avg: $avgHeartRate");
-      print("  HRV count: ${hrvRates.length}");
-      print("  HRV avg: $avgHrv");
     }
 
     return HeartMetrics(
@@ -341,4 +331,42 @@ class HealthRepository {
           );
     });
   }
-}
+}  
+    Future<HeartMetrics> getHeartMetrics() async {
+    final heartRates = await getHeartRateList();
+    final hrvRates = await getHeartRateVariabilityRate();
+
+    double? avgHeartRate;
+    double? avgHrv;
+
+    if (heartRates.isNotEmpty) {
+      final sum = heartRates
+          .map((e) => e.value)
+          .reduce((a, b) => a + b);
+      avgHeartRate = sum / heartRates.length;
+    }
+
+    if (hrvRates.isNotEmpty) {
+      final sum = hrvRates
+          .map((e) => e.value)
+          .reduce((a, b) => a + b);
+      avgHrv = sum / hrvRates.length;
+    }
+
+    if (kDebugMode) {
+      print("Heart metrics:");
+      print("  HR count: ${heartRates.length}");
+      print("  HR avg: $avgHeartRate");
+      print("  HRV count: ${hrvRates.length}");
+      print("  HRV avg: $avgHrv");
+    }
+
+    return HeartMetrics(
+      heartRates: heartRates,
+      hrvRates: hrvRates,
+      averageHeartRate: avgHeartRate,
+      averageHrv: avgHrv,
+    );
+    }
+
+
