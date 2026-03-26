@@ -30,4 +30,6 @@ abstract class Goal {
       return Symbols.target;
     }
   }
+
+  bool get completed => false;
 }

@@ -40,9 +40,9 @@ class GoalsScreen extends StatelessWidget {
                 .textTheme
                 .titleLarge),
             const SizedBox(height: 16),
-            ...dummyGoals
-                .map((goal) => GoalOverviewWidget(goalModel: goal))
-                .toList(),
+            // ...dummyGoals
+            //     .map((goal) => GoalOverviewWidget(goalModel: goal))
+            //     .toList(),
             Card(
               elevation: 1,
               clipBehavior: Clip.antiAlias,

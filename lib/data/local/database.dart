@@ -157,6 +157,8 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   int get schemaVersion => 1;
+
+  ResultSetImplementation<HasResultSet, dynamic> get goals => null;
 }
 
 /// ----------------------------

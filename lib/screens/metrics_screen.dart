@@ -30,22 +30,6 @@ class _MetricsScreenState extends State<MetricsScreen> {
     db = widget.database;
   }
 
-  Future<void> _loadMetrics() async {
-    final hrv = await _hrvService.getDailyHrv();
-    if (!mounted) return;
-    setState(() {
-      _hrv = hrv;
-
-      if (hrv != '-- ms') {
-        final hrvValue = double.tryParse(
-          hrv.replaceAll(RegExp(r'[^0-9.]'), ''),
-        );
-        _goodHrvStatus = hrvValue != null && hrvValue >= 35 && hrvValue <= 99;
-      }
-
-      _loading = false;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
