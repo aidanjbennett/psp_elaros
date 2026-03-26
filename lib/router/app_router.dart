@@ -58,7 +58,7 @@ final router = GoRouter(
               path: '/goals',
               // I added 'const' here based on the duplicate code,
               // assuming your GoalsScreen has a const constructor
-              builder: (context, state) => GoalsScreen(),
+              builder: (context, state) => GoalsScreen,
             ),
           ],
         ),

@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:psp_elaros/data/local/database.dart' as db;
 import 'package:psp_elaros/data/repositories/health_repository.dart';
 import 'package:psp_elaros/data/models/sleep_model.dart';
-import 'package:psp_elaros/data/models/heart_metrics_model.dart';
+import 'package:psp_elaros/data/models/heart_metrics_model.dart' hide HeartMetrics;
 import 'package:psp_elaros/data/models/heart_rate_data_model.dart';
 import 'package:psp_elaros/data/models/heart_rate_variability_rate_model.dart';
 

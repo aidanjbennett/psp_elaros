@@ -9,7 +9,8 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
-import '../database/database.dart';
+import '../data/local/database.dart';
+import 'lib/data/local/database.dart';
 
 // export rang
 enum ExportRange {
@@ -39,6 +40,8 @@ class ExportService {
   final AppDatabase db;
 
   ExportService(this.db);
+
+  get Share => null;
 
   // directory
   Future<Directory> _getDirectory() async {
@@ -103,7 +106,6 @@ class ExportService {
       const JsonEncoder.withIndent('  ').convert(data),
     );
 
-    await _shareIfNeeded(file);
     return file;
   }
 
@@ -142,11 +144,7 @@ class ExportService {
     });
 
     await file.writeAsString(buffer.toString());
-
-    await _shareIfNeeded(file);
-    return file;
   }
-
 
 
   // pdf
@@ -204,7 +202,7 @@ class ExportService {
     }
 
     final avgSteps =
-        stepsData.isEmpty ? 0 : (totalSteps / stepsData.length).round();
+    stepsData.isEmpty ? 0 : (totalSteps / stepsData.length).round();
 
     Duration totalSleep = Duration.zero;
     for (final row in sleepData) {
@@ -256,7 +254,6 @@ class ExportService {
                 width: 10,
                 height: height,
                 margin: const pw.EdgeInsets.symmetric(horizontal: 2),
-                color: PdfColor(0.2, 0.5, 0.8),
               );
             }).toList(),
           ),
@@ -303,8 +300,7 @@ class ExportService {
                 final bg = index % 2 == 0
                     ? null
                     : const pw.BoxDecoration(
-                        color: PdfColor(0.95, 0.95, 0.95),
-                      );
+                );
 
                 return pw.TableRow(
                   decoration: bg,
@@ -329,7 +325,8 @@ class ExportService {
     pdf.addPage(
       pw.MultiPage(
         margin: const pw.EdgeInsets.all(24),
-        build: (_) => [
+        build: (_) =>
+        [
           pw.Text("Health Report", style: titleStyle),
           pw.SizedBox(height: 10),
           pw.Text("Generated: ${DateTime.now()}",
@@ -354,16 +351,21 @@ class ExportService {
     final file = File('${dir.path}/health_export.pdf');
     await file.writeAsBytes(await pdf.save());
 
-    await _shareIfNeeded(file);
     return file;
   }
 
   // ios
-  Future<void> _shareIfNeeded(File file) async {
-    if (Platform.isIOS) {
-      await Share.shareXFiles([XFile(file.path)]);
-    }
-  }
+//   Future<void> _shareIfNeeded(File file) async {
+//     if (Platform.isIOS) {
+//       await Share.shareXFiles([XFile(file.path)]);
+//     }
+//   }
+// }
+
+
+
 }
 
-
+class Permission {
+  static get storage => null;
+}

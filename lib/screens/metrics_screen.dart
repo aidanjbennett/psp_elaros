@@ -1,7 +1,11 @@
+import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:psp_elaros/services/hrv_service.dart';
 import 'package:psp_elaros/style/app_style.dart';
+
+import '../data/local/database.dart';
+import '../data/local/db_instance.dart';
 
 late final AppDatabase db;
 
@@ -153,7 +157,7 @@ class _MetricsScreenState extends State<MetricsScreen> {
     );
   },
 )
-                      const SizedBox(width: 10),
+                      ,const SizedBox(width: 10),
                       Text(
                         _goodHrvStatus ? 'Good HRV' : 'Bad HRV',
                         style: TextStyle(
