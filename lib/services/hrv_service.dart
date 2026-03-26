@@ -38,4 +38,14 @@ class HrvService {
     final now = DateTime.now();
     return _latestHrvInRange(DateTime(now.year, now.month, now.day), now);
   }
+
+  Future<String> getWeeklyHrv() {
+    final now = DateTime.now();
+    return _latestHrvInRange(now.subtract(const Duration(days: 7)), now);
+  }
+
+  Future<String> getMonthlyHrv() {
+    final now = DateTime.now();
+    return _latestHrvInRange(now.subtract(const Duration(days: 30)), now);
+  }
 }
