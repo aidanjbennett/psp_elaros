@@ -37,17 +37,17 @@
         </intent>
     </queries>
 
-    <service
-            android:name="be.tramckrijte.workmanager.WorkManagerTaskService"
-            android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-
     <application
         android:label="psp_elaros"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true"
         >
+
+         <service
+            android:name="be.tramckrijte.workmanager.WorkManagerTaskService"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <!-- Required for Health Connect: links to privacy policy from permissions screen -->
         <activity-alias
