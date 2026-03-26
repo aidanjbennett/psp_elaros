@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:psp_elaros/data/models/goals/goal.dart';
 import 'package:psp_elaros/style/app_style.dart';
-import 'package:psp_elaros/widgets/goals/goal_model.dart';
 
 class GoalOverviewWidget extends StatelessWidget {
   final Goal goalModel;
