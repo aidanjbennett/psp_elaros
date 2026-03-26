@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:psp_elaros/screens/dashboard_shell.dart';
 import 'package:psp_elaros/screens/metrics_screen.dart';
 import 'package:psp_elaros/screens/goals_screen.dart';
+import 'package:psp_elaros/screens/trends_screen.dart';
 import 'package:psp_elaros/screens/settings/root_settings.dart';
 import 'package:psp_elaros/screens/settings/submenus/colour_settings_submenu.dart';
 import 'package:psp_elaros/screens/settings/submenus/data_settings_submenu.dart';
@@ -46,7 +47,7 @@ final router = GoRouter(
               path: '/trends',
               // Assuming this should eventually be a TrendsScreen()
               // rather than re-using MetricsScreen()
-              builder: (context, state) => const MetricsScreen(),
+              builder: (context, state) => const TrendsScreen(),
             ),
           ],
         ),
