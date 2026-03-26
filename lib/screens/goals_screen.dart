@@ -3,7 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:psp_elaros/style/app_style.dart';
 
 class GoalsScreen extends StatelessWidget {
-  const GoalsScreen({super.key});
+  final AppDatabase db;
+
+  const GoalsScreen({super.key, required this.db});
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +31,41 @@ class GoalsScreen extends StatelessWidget {
               "Your Goals",
               style: Theme.of(context).textTheme.titleLarge,
             ),
-          ],
-        ),
-      ),
+             Expanded(
+            child: StreamBuilder(
+              stream: db.select(db.goals).watch(),
+              builder: (context, AsyncSnapshot<List<Goal>> snapshot) {
+                if (!snapshot.hasData) {
+                  return const CircularProgressIndicator();
+                }
 
-    );
-  }
+                final goals = snapshot.data!;
+
+                if (goals.isEmpty) {
+                  return const Text("No goals yet");
+                }
+
+                return ListView.builder(
+                  itemCount: goals.length,
+                  itemBuilder: (context, index) {
+                    final goal = goals[index];
+
+                    return ListTile(
+                      title: Text(goal.title),
+                      trailing: Icon(
+                        goal.completed
+                            ? Icons.check_circle
+                            : Icons.circle_outlined,
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
+
