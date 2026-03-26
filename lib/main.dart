@@ -6,6 +6,7 @@ import 'package:psp_elaros/data/models/sleep_model.dart';
 import 'package:psp_elaros/data/repositories/health_repository.dart';
 import 'package:flutter/services.dart';
 import 'package:psp_elaros/router/app_router.dart';
+import 'package:psp_elaros/services/heart_rate_service.dart';
 import 'package:psp_elaros/services/notification_service.dart';
 import 'package:psp_elaros/style/app_style.dart';
 import 'package:workmanager/workmanager.dart';
@@ -35,7 +36,7 @@ void callbackDispatcher() {
         Workmanager().registerOneOffTask(
           "daily-health-sync",
           "syncHealthDataTask",
-          initialDelay: const Duration(hours: 24),
+          initialDelay: const Duration(minutes: 15),
         );
       }
 
@@ -57,7 +58,7 @@ void main() async {
   await Workmanager().registerPeriodicTask(
     "daily-health-sync", // Unique Name
     "syncHealthDataTask", // Task Name
-    frequency: const Duration(hours: 24),
+    frequency: const Duration(minutes: 15),
     constraints: Constraints(
       requiresBatteryNotLow: true, // Save battery life
     ),
@@ -70,6 +71,38 @@ void main() async {
   final healthRepo = HealthRepository(database: database);
   await healthRepo.requestPermissions();
 
+  final service = HeartRateService(healthRepo);
+  final result = await service.getZoneCounts(HeartRatePeriod.week);
+  if (kDebugMode) {
+    // Local helper to format Duration into HH:mm:ss
+    String fmt(Duration d) {
+      final hours = d.inHours;
+      final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+      final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+      return "${hours}h ${minutes}m ${seconds}s";
+    }
+
+    print("--- Heart Rate Zone Summary ---");
+    print("Period: ${result.period} | Total Points: ${result.totalDataPoints}");
+    print("Total Time Tracked: ${fmt(result.totalDuration)}");
+    print("-------------------------------");
+    print(
+      "Blue: ${result.blue.toString().padRight(5)} | Time: ${fmt(result.blueDuration)}",
+    );
+    print(
+      "Green: ${result.green.toString().padRight(5)} | Time: ${fmt(result.greenDuration)}",
+    );
+    print(
+      "Yellow: ${result.yellow.toString().padRight(5)} | Time: ${fmt(result.yellowDuration)}",
+    );
+    print(
+      "Orange: ${result.orange.toString().padRight(5)} | Time: ${fmt(result.orangeDuration)}",
+    );
+    print(
+      "Red: ${result.red.toString().padRight(5)} | Time: ${fmt(result.redDuration)}",
+    );
+    print("-------------------------------");
+  }
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
