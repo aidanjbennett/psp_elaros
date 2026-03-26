@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:psp_elaros/data/health_data.dart';
+import 'package:psp_elaros/services/hrv_service.dart';
 import 'package:psp_elaros/style/app_style.dart';
 
 class MetricsScreen extends StatefulWidget {
@@ -11,7 +11,7 @@ class MetricsScreen extends StatefulWidget {
 }
 
 class _MetricsScreenState extends State<MetricsScreen> {
-  final HealthData _healthData = HealthData();
+  final HrvService _hrvService = HrvService();
 
   String _hrv = '-- ms';
   bool _loading = true;
@@ -23,7 +23,7 @@ class _MetricsScreenState extends State<MetricsScreen> {
   }
 
   Future<void> _loadMetrics() async {
-    final hrv = await _healthData.getDailyHrv();
+    final hrv = await _hrvService.getDailyHrv();
     if (!mounted) return;
     setState(() {
       _hrv = hrv;
