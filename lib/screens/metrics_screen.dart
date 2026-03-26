@@ -15,6 +15,7 @@ class _MetricsScreenState extends State<MetricsScreen> {
 
   String _hrv = '-- ms';
   bool _loading = true;
+  bool _goodHrvStatus = false;
 
   @override
   void initState() {
@@ -27,6 +28,14 @@ class _MetricsScreenState extends State<MetricsScreen> {
     if (!mounted) return;
     setState(() {
       _hrv = hrv;
+
+      if (hrv != '-- ms') {
+        final hrvValue = double.tryParse(
+          hrv.replaceAll(RegExp(r'[^0-9.]'), ''),
+        );
+        _goodHrvStatus = hrvValue != null && hrvValue >= 35 && hrvValue <= 99;
+      }
+
       _loading = false;
     });
   }
@@ -118,9 +127,12 @@ class _MetricsScreenState extends State<MetricsScreen> {
                               ),
                             ),
                       const SizedBox(width: 10),
-                      const Text(
-                        'text demo',
-                        style: TextStyle(fontSize: 18, color: Colors.red),
+                      Text(
+                        _goodHrvStatus ? 'Good HRV' : 'Bad HRV',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: _goodHrvStatus ? Colors.green : Colors.red,
+                        ),
                       ),
                     ],
                   ),
