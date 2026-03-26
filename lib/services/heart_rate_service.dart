@@ -1,66 +1,30 @@
 import 'package:flutter/foundation.dart';
+import 'package:health/health.dart';
 import 'package:psp_elaros/data/models/heart_rate_data_model.dart';
+import 'package:psp_elaros/data/models/heart_rate_zone_result.dart';
 import 'package:psp_elaros/data/repositories/health_repository.dart';
 
-enum HeartRatePeriod { day, week, month }
-
-class HeartRateZoneResult {
-  final int blue, green, yellow, orange, red;
-
-  // Time spent in each zone
-  final Duration blueDuration;
-  final Duration greenDuration;
-  final Duration yellowDuration;
-  final Duration orangeDuration;
-  final Duration redDuration;
-
-  final HeartRatePeriod period;
-  final DateTime from;
-  final DateTime to;
-
-  HeartRateZoneResult({
-    required this.blue,
-    required this.green,
-    required this.yellow,
-    required this.orange,
-    required this.red,
-    required this.blueDuration,
-    required this.greenDuration,
-    required this.yellowDuration,
-    required this.orangeDuration,
-    required this.redDuration,
-    required this.period,
-    required this.from,
-    required this.to,
-  });
-
-  int get totalDataPoints => blue + green + yellow + orange + red;
-
-  Duration get totalDuration =>
-      blueDuration +
-      greenDuration +
-      yellowDuration +
-      orangeDuration +
-      redDuration;
-}
+enum DatePeriod { day, week, month }
 
 class HeartRateService {
   final HealthRepository _repository;
 
   HeartRateService(this._repository);
 
-  DateTime _fromDate(HeartRatePeriod period) {
+  final Health _health = Health();
+
+  DateTime _fromDate(DatePeriod period) {
     final now = DateTime.now();
     return switch (period) {
-      HeartRatePeriod.day => DateTime(now.year, now.month, now.day),
-      HeartRatePeriod.week => now.subtract(const Duration(days: 7)),
-      HeartRatePeriod.month => DateTime(now.year, now.month - 1, now.day),
+      DatePeriod.day => DateTime(now.year, now.month, now.day),
+      DatePeriod.week => now.subtract(const Duration(days: 7)),
+      DatePeriod.month => DateTime(now.year, now.month - 1, now.day),
     };
   }
 
   HeartRateZoneResult _classify(
     List<HeartRate> data,
-    HeartRatePeriod period,
+    DatePeriod period,
     DateTime from,
   ) {
     int blue = 0, green = 0, yellow = 0, orange = 0, red = 0;
@@ -127,7 +91,7 @@ class HeartRateService {
     );
   }
 
-  Future<HeartRateZoneResult> getZoneCounts(HeartRatePeriod period) async {
+  Future<HeartRateZoneResult> getZoneCounts(DatePeriod period) async {
     final from = _fromDate(period);
     final data = await _repository.getHeartRateList();
 
@@ -140,8 +104,51 @@ class HeartRateService {
     return _classify(filtered, period, from);
   }
 
-  Future<int> getTotalDataPoints(HeartRatePeriod period) async {
+  Future<int> getTotalDataPoints(DatePeriod period) async {
     final result = await getZoneCounts(period);
     return result.totalDataPoints;
+  }
+
+  Future<int> getDailyAverageHeartRate() async {
+    final now = DateTime.now();
+    return _averageHeartRateInRange(
+      DateTime(now.year, now.month, now.day),
+      now,
+    );
+  }
+
+  Future<int> getWeeklyAverageHeartRate() {
+    final now = DateTime.now();
+    return _averageHeartRateInRange(now.subtract(const Duration(days: 7)), now);
+  }
+
+  Future<int> getMonthlyAverageHeartRate() {
+    final now = DateTime.now();
+    return _averageHeartRateInRange(
+      now.subtract(const Duration(days: 30)),
+      now,
+    );
+  }
+
+  Future<int> _averageHeartRateInRange(DateTime start, DateTime end) async {
+    try {
+      final data = await _health.getHealthDataFromTypes(
+        startTime: start,
+        endTime: end,
+        types: [HealthDataType.HEART_RATE],
+      );
+
+      final unique = _health.removeDuplicates(data);
+
+      if (unique.isEmpty) return 0;
+
+      final values = unique.map(
+        (p) => (p.value as NumericHealthValue).numericValue.toDouble(),
+      );
+      return (values.reduce((a, b) => a + b) / values.length).round();
+    } catch (e) {
+      if (kDebugMode) print("Error fetching heart rate: $e");
+      return 0;
+    }
   }
 }
