@@ -1,39 +1,75 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:psp_elaros/data/local/database.dart' as db;
+import 'package:psp_elaros/data/models/heart_metrics_model.dart';
+import 'package:psp_elaros/data/models/sleep_model.dart';
 import 'package:psp_elaros/data/repositories/health_repository.dart';
 import 'package:flutter/services.dart';
 import 'package:psp_elaros/router/app_router.dart';
-import 'package:psp_elaros/screens/about_screen.dart';
-import 'package:psp_elaros/screens/home_screen.dart';
-import 'package:psp_elaros/screens/metrics_screen.dart';
 import 'package:psp_elaros/services/notification_service.dart';
 import 'package:psp_elaros/style/app_style.dart';
 import 'package:workmanager/workmanager.dart';
-import 'background/health_sync_task.dart';
+import 'dart:io';
 
-Future<void> _registerBackgroundTask() async {
-  await Workmanager().initialize(healthSyncCallbackDispatcher);
-  await Workmanager().registerPeriodicTask(
-    'health-sync-task',
-    HealthSyncTask.taskName,
-    frequency: const Duration(minutes: 15),
-    constraints: Constraints(
-      networkType: NetworkType.notRequired,
-      requiresBatteryNotLow: true,
-    ),
-    existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
-  );
+@pragma('vm:entry-point')
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    try {
+      final database = db.AppDatabase();
+      final healthRepo = HealthRepository(database: database);
+
+      // Steps
+      int steps = await healthRepo.getSteps();
+      await healthRepo.saveSteps(steps);
+
+      // Heart Rate and HRV
+      HeartMetrics heartMetrics = await healthRepo.getHeartMetrics();
+      await healthRepo.saveHeartMetrics(heartMetrics);
+
+      // Sleep
+      Sleep sleepData = await healthRepo.getLastNightSleep();
+      await healthRepo.saveSleep(sleepData);
+
+      // iOS Workaround (Manual Re-scheduling)
+      if (Platform.isIOS) {
+        Workmanager().registerOneOffTask(
+          "daily-health-sync",
+          "syncHealthDataTask",
+          initialDelay: const Duration(hours: 24),
+        );
+      }
+
+      await database.close();
+      return Future.value(true);
+    } catch (e) {
+      if (kDebugMode) print("Background Task Failed: $e");
+      return Future.value(false);
+    }
+  });
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await _registerBackgroundTask(); // This might need to be first
+  await Workmanager().initialize(callbackDispatcher, isInDebugMode: kDebugMode);
+
+  // Use Periodic Task for 24-hour intervals
+  await Workmanager().registerPeriodicTask(
+    "daily-health-sync", // Unique Name
+    "syncHealthDataTask", // Task Name
+    frequency: const Duration(hours: 24),
+    constraints: Constraints(
+      requiresBatteryNotLow: true, // Save battery life
+    ),
+  );
+
+  final database = db.AppDatabase();
 
   await NotificationService.init();
 
-  final healthRepo = HealthRepository();
+  final healthRepo = HealthRepository(database: database);
   await healthRepo.requestPermissions();
-  
+
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,

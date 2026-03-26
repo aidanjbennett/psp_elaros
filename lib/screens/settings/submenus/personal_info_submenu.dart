@@ -18,6 +18,7 @@ class _PersonalInfoSettingsSubmenuState extends State<PersonalInfoSettingsSubmen
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(title: const Text("Personal Info"), centerTitle: true),
       body: ListView(

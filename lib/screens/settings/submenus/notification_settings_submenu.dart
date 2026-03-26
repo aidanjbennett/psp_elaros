@@ -17,6 +17,7 @@ class _NotificationSettingsSubmenuState extends State<NotificationSettingsSubmen
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(title: const Text("Notifications")),
       body: ListView(

@@ -127,6 +127,7 @@ class _HRZonesSettingsSubmenuState extends State<HRZonesSettingsSubmenu> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(title: const Text("Heart Rate Zones"), centerTitle: true),
       body: ListView(

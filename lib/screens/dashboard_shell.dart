@@ -23,8 +23,12 @@ class DashboardShell extends StatelessWidget {
 
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.bar_chart),
-            label: 'Metrics',
+            icon: Icon(Icons.dashboard),
+            label: 'Dashboard',
+          ),
+          NavigationDestination(
+              icon: Icon(Icons.stacked_line_chart),
+              label: 'Trends'
           ),
           NavigationDestination(
             icon: Icon(Icons.track_changes),

@@ -43,6 +43,7 @@ class _HealthBiometricsSubmenuState extends State<HealthBiometricsSubmenu> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(title: const Text("Health Biometrics"), centerTitle: true),
       body: ListView(

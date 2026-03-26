@@ -81,9 +81,7 @@
 	</array>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-    <string>com.example.psp_elaros</string>
-    <string>com.example.backgroundprocessing</string>
-		<string>com.example.periodic_task</string>
+		<string>daily-health-sync</string>
 	</array>
 </dict>
 </plist>
