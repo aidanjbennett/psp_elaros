@@ -66,6 +66,7 @@ const ElarosApp({super.key});
 Widget build(BuildContext context) {
 return MaterialApp.router(
 title: 'My Flutter App',
+  theme: AppTheme.light(),
 routerConfig: router,
 );
 }

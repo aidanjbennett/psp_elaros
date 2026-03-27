@@ -10,6 +10,7 @@ import 'package:psp_elaros/widgets/charts/hrv_chart.dart';
 import 'package:psp_elaros/widgets/charts/steps_chart.dart';
 import 'package:psp_elaros/widgets/charts/zones_chart.dart';
 import 'package:psp_elaros/widgets/date_navigation_header.dart';
+import 'package:psp_elaros/services/trends_selection.dart';
 
 class TrendsScreen extends StatefulWidget {
   const TrendsScreen({super.key});
@@ -21,11 +22,31 @@ class TrendsScreen extends StatefulWidget {
 class _TrendsScreenState extends State<TrendsScreen> {
   final TrendsService trendsService = TrendsService();
 
-  MetricType selectedMetric = MetricType.heartRate;
+  late MetricType selectedMetric;
   Timeframe selectedTimeframe = Timeframe.weekly;
   DateTime selectedDate = DateTime.now();
 
   final List<MetricType> metrics = MetricType.values;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedMetric = TrendsSelection.selectedMetric.value;
+    TrendsSelection.selectedMetric.addListener(_handleMetricChanged);
+  }
+
+  void _handleMetricChanged() {
+    if (!mounted) return;
+    setState(() {
+      selectedMetric = TrendsSelection.selectedMetric.value;
+    });
+  }
+
+  @override
+  void dispose() {
+    TrendsSelection.selectedMetric.removeListener(_handleMetricChanged);
+    super.dispose();
+  }
 
   DropdownMenuItem<MetricType> buildMetricItem(MetricType metric) {
     return DropdownMenuItem<MetricType>(
@@ -242,7 +263,7 @@ class _TrendsScreenState extends State<TrendsScreen> {
             children: [
               Text(
                 "Trends",
-                style: Theme.of(context).textTheme.titleLarge,
+                style: Theme.of(context).textTheme.headlineLarge,
               ),
               const SizedBox(height: 12),
               DateNavigationHeader(
@@ -268,6 +289,7 @@ class _TrendsScreenState extends State<TrendsScreen> {
                       DropdownButton<MetricType>(
                         value: selectedMetric,
                         isExpanded: true,
+                        style: const TextStyle(color: Colors.black),
                         items: metrics.map(buildMetricItem).toList(),
                         onChanged: (value) {
                           if (value != null) {
@@ -333,7 +355,7 @@ class _TrendsScreenState extends State<TrendsScreen> {
                     children: [
                       Text(
                         "Heart Rate Zones",
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        style: Theme.of(context).textTheme.bodyLarge,
                       ),
                       const SizedBox(height: 16),
                       Expanded(

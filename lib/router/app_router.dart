@@ -13,6 +13,8 @@ import 'package:psp_elaros/screens/settings/submenus/motion_settings_submenu.dar
 import 'package:psp_elaros/screens/settings/submenus/notification_settings_submenu.dart';
 import 'package:psp_elaros/screens/settings/submenus/personal_info_submenu.dart';
 import 'package:psp_elaros/screens/settings/submenus/typography_settings_submenu.dart';
+import 'package:psp_elaros/data/local/db_instance.dart';
+import 'package:psp_elaros/models/trend_enums.dart';
 
 // Keys for navigating outside the shell (e.g., full-screen settings pages)
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -45,8 +47,6 @@ final router = GoRouter(
           routes: [
             GoRoute(
               path: '/trends',
-              // Assuming this should eventually be a TrendsScreen()
-              // rather than re-using MetricsScreen()
               builder: (context, state) => const TrendsScreen(),
             ),
           ],
@@ -58,7 +58,7 @@ final router = GoRouter(
               path: '/goals',
               // I added 'const' here based on the duplicate code,
               // assuming your GoalsScreen has a const constructor
-              builder: (context, state) => GoalsScreen,
+              builder: (context, state) => GoalsScreen(db: database),
             ),
           ],
         ),

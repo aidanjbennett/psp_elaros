@@ -42,9 +42,6 @@ class DashboardShell extends StatelessWidget {
   void _onBranch(int index) {
     navigationShell.goBranch(
       index,
-      // A common pattern when using bottom navigation.
-      // If the user taps the item that is already selected,
-      // return to the initial location of the branch (reset the stack).
       initialLocation: index == navigationShell.currentIndex,
     );
   }

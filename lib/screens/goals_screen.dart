@@ -6,12 +6,10 @@ import 'package:psp_elaros/data/models/goals/recurring_goal.dart';
 import 'package:psp_elaros/style/app_style.dart';
 import 'package:psp_elaros/widgets/goals/add_goal_form.dart';
 import 'package:psp_elaros/widgets/goals/goal_overview_widget.dart';
-
-import '../data/local/database.dart';
-
+import 'package:psp_elaros/data/local/database.dart' as database;
 
 class GoalsScreen extends StatelessWidget {
-  final AppDatabase db;
+  final database.AppDatabase db;
 
   const GoalsScreen({super.key, required this.db});
 
@@ -38,7 +36,7 @@ class GoalsScreen extends StatelessWidget {
             Text("Your Goals", style: Theme
                 .of(context)
                 .textTheme
-                .titleLarge),
+                .headlineLarge),
             const SizedBox(height: 16),
             // ...dummyGoals
             //     .map((goal) => GoalOverviewWidget(goalModel: goal))
@@ -98,17 +96,15 @@ class GoalsScreen extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: StreamBuilder(
+              child: StreamBuilder<List<database.Goal>>(
                 stream: db.select(db.goals).watch(),
-                builder: (context, AsyncSnapshot<List<Goal>> snapshot) {
-                  if (!snapshot.hasData) {
-                    return const CircularProgressIndicator();
-                  }
-
-                  final goals = snapshot.data!;
+                builder: (context, snapshot) {
+                  final goals = snapshot.data ?? [];
 
                   if (goals.isEmpty) {
-                    return const Text("No goals yet");
+                    return const Center(
+                      child: Text("No goals yet"),
+                    );
                   }
 
                   return ListView.builder(

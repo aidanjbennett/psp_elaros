@@ -34,13 +34,13 @@ class AppTheme {
       fontFamily: 'Source Sans 3',
       textTheme: const TextTheme(
         headlineLarge: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-        titleLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        titleLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,),
         titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        bodyMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        bodySmall: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+        bodyLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        bodySmall: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
       ).apply(
-        bodyColor: AppColors.onBackground,
-        displayColor: AppColors.onSurface,
+        bodyColor: AppColors.onSurface,
+        displayColor: AppColors.onBackground,
       ),
 
       cardTheme: CardThemeData(
