@@ -6,11 +6,7 @@ class SettingsGroup extends StatelessWidget {
   final String? title;
   final List<SettingsItemModel> items;
 
-  const SettingsGroup({
-    super.key,
-    this.title,
-    required this.items,
-  });
+  const SettingsGroup({super.key, this.title, required this.items});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +32,7 @@ class SettingsGroup extends StatelessWidget {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: items.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 2),
+          separatorBuilder: (_, _) => const SizedBox(height: 2),
           itemBuilder: (context, index) {
             final radius = _calculateRadius(index, items.length);
             return SettingsItem(item: items[index], borderRadius: radius);
@@ -51,7 +47,8 @@ class SettingsGroup extends StatelessWidget {
     const s = Radius.circular(4.0);
     if (total == 1) return const BorderRadius.all(r);
     if (index == 0) return const BorderRadius.vertical(top: r, bottom: s);
-    if (index == total - 1) return const BorderRadius.vertical(top: s, bottom: r);
+    if (index == total - 1)
+      return const BorderRadius.vertical(top: s, bottom: r);
     return const BorderRadius.all(s);
   }
 }
