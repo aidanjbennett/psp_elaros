@@ -56,7 +56,7 @@ void main() async {
 
   // Use Periodic Task for 24-hour intervals
   await Workmanager().registerPeriodicTask(
-    "daily-health-sync", // Unique Name
+    "daily-health-sync-periodic", // Unique Name
     "syncHealthDataTask", // Task Name
     frequency: const Duration(minutes: 15),
     constraints: Constraints(

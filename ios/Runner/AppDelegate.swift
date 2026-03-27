@@ -16,11 +16,11 @@ import workmanager_apple
 
     // Work Manager Required
     WorkmanagerPlugin.registerBGProcessingTask(
-      withIdentifier: "com.example.processing_task"
+      withIdentifier: "daily-health-sync"
     )
 
     WorkmanagerPlugin.registerPeriodicTask(
-      withIdentifier: "com.example.periodic_task",
+      withIdentifier: "daily-health-sync-periodic",
       frequency: NSNumber(value: 15 * 60)  // (15 min minimum)
     )
 
