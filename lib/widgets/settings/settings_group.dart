@@ -47,8 +47,9 @@ class SettingsGroup extends StatelessWidget {
     const s = Radius.circular(4.0);
     if (total == 1) return const BorderRadius.all(r);
     if (index == 0) return const BorderRadius.vertical(top: r, bottom: s);
-    if (index == total - 1)
+    if (index == total - 1) {
       return const BorderRadius.vertical(top: s, bottom: r);
+    }
     return const BorderRadius.all(s);
   }
 }
