@@ -224,7 +224,7 @@ class _TrendsScreenState extends State<TrendsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Bettertrack"),
+        title: const Text("BetterTrack"),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -242,7 +242,9 @@ class _TrendsScreenState extends State<TrendsScreen> {
             children: [
               Text(
                 "Trends",
-                style: Theme.of(context).textTheme.titleLarge,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: AppColors.onBackground
+                ),
               ),
               const SizedBox(height: 12),
               DateNavigationHeader(

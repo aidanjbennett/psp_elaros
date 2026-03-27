@@ -7,9 +7,6 @@ class AppColors {
 
 //text colours
   static const Color onBackground = Color(0xFFFFFFFF);
-  static const Color onSurface = Color(0xFF2F2F2F);
-  static const Color muted = Color(0xFF6E6E6E);
-
 
   static const Color positive = Color(0xFF5FBF73);
   static const Color negative = Color(0xFFE46A61);
@@ -39,8 +36,6 @@ class AppTheme {
         bodyMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         bodySmall: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
       ).apply(
-        bodyColor: AppColors.onBackground,
-        displayColor: AppColors.onSurface,
       ),
 
       cardTheme: CardThemeData(

@@ -65,7 +65,9 @@ class _MetricsScreenState extends State<MetricsScreen> {
           children: [
             Text(
               "Status Overview",
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: AppColors.onBackground
+              ),
             ),
             const SizedBox(height: 16),
             Container(

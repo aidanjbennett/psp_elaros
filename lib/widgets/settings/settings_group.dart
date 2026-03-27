@@ -25,7 +25,7 @@ class SettingsGroup extends StatelessWidget {
             child: Text(
               title!,
               style: TextStyle(
-                color: scheme.primary,
+                color: Theme.of(context).colorScheme.onPrimary,
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
               ),

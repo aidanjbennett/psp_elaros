@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:psp_elaros/style/app_style.dart';
 
 class DateNavigationHeader extends StatelessWidget {
   final String label;
@@ -23,6 +24,7 @@ class DateNavigationHeader extends StatelessWidget {
         IconButton(
           onPressed: onPrevious,
           icon: const Icon(Icons.chevron_left),
+          color: AppColors.onBackground,
         ),
         Expanded(
           child: InkWell(
@@ -33,7 +35,9 @@ class DateNavigationHeader extends StatelessWidget {
               child: Text(
                 label,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleMedium,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: AppColors.onBackground
+                ),
               ),
             ),
           ),
@@ -41,6 +45,7 @@ class DateNavigationHeader extends StatelessWidget {
         IconButton(
           onPressed: canGoForward ? onNext : null,
           icon: const Icon(Icons.chevron_right),
+          color: AppColors.onBackground,
         ),
       ],
     );

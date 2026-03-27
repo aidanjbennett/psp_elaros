@@ -33,7 +33,11 @@ class GoalsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Your Goals", style: Theme.of(context).textTheme.titleLarge),
+            Text(
+                "Your Goals", style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              color: AppColors.onBackground
+              ),
+            ),
             const SizedBox(height: 16),
             // Needs implementing
             // ...dummyGoals
