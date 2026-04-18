@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
-import 'package:psp_elaros/data/local/db_instance.dart';
 import 'package:psp_elaros/screens/dashboard_shell.dart';
 import 'package:psp_elaros/screens/metrics_screen.dart';
 import 'package:psp_elaros/screens/goals_screen.dart';
@@ -59,7 +58,7 @@ final router = GoRouter(
               path: '/goals',
               // I added 'const' here based on the duplicate code,
               // assuming your GoalsScreen has a const constructor
-              builder: (context, state) => GoalsScreen(db: database),
+              builder: (context, state) => GoalsScreen(),
             ),
           ],
         ),

@@ -9,9 +9,10 @@ import 'package:psp_elaros/widgets/goals/add_goal_form.dart';
 import 'package:psp_elaros/widgets/goals/goal_overview_widget.dart';
 
 class GoalsScreen extends StatelessWidget {
-  final AppDatabase db;
+  // final AppDatabase db;
 
-  const GoalsScreen({super.key, required this.db});
+  // required this.db
+  const GoalsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -34,9 +35,10 @@ class GoalsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-                "Your Goals", style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: AppColors.onBackground
-              ),
+              "Your Goals",
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(color: AppColors.onBackground),
             ),
             const SizedBox(height: 16),
             // Needs implementing
