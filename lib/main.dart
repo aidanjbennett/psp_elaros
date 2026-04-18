@@ -6,7 +6,6 @@ import 'package:psp_elaros/data/models/sleep_model.dart';
 import 'package:psp_elaros/data/repositories/health_repository.dart';
 import 'package:flutter/services.dart';
 import 'package:psp_elaros/router/app_router.dart';
-import 'package:psp_elaros/services/heart_rate_service.dart';
 import 'package:psp_elaros/services/notification_service.dart';
 import 'package:psp_elaros/style/app_style.dart';
 import 'package:workmanager/workmanager.dart';
@@ -52,6 +51,7 @@ void callbackDispatcher() {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // ignore: deprecated_member_use
   await Workmanager().initialize(callbackDispatcher, isInDebugMode: kDebugMode);
 
   // Use Periodic Task for 24-hour intervals
