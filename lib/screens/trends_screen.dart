@@ -1,9 +1,8 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:psp_elaros/models/trend_enums.dart';
-import 'package:psp_elaros/models/zone_duration.dart';
-import 'package:psp_elaros/services/trends_service.dart';
+import 'package:psp_elaros/models/trend_model.dart';
 import 'package:psp_elaros/style/app_style.dart';
 import 'package:psp_elaros/widgets/charts/heart_rate_chart.dart';
 import 'package:psp_elaros/widgets/charts/hrv_chart.dart';
@@ -11,226 +10,76 @@ import 'package:psp_elaros/widgets/charts/steps_chart.dart';
 import 'package:psp_elaros/widgets/charts/zones_chart.dart';
 import 'package:psp_elaros/widgets/date_navigation_header.dart';
 
-class TrendsScreen extends StatefulWidget {
+class TrendsScreen extends StatelessWidget {
   const TrendsScreen({super.key});
 
-  @override
-  State<TrendsScreen> createState() => _TrendsScreenState();
-}
-
-class _TrendsScreenState extends State<TrendsScreen> {
-  final TrendsService trendsService = TrendsService();
-
-  MetricType selectedMetric = MetricType.heartRate;
-  Timeframe selectedTimeframe = Timeframe.weekly;
-  DateTime selectedDate = DateTime.now();
-
-  final List<MetricType> metrics = MetricType.values;
-
-  DropdownMenuItem<MetricType> buildMetricItem(MetricType metric) {
-    return DropdownMenuItem<MetricType>(
-      value: metric,
-      child: Text(metricLabel(metric)),
-    );
+  String _metricLabel(MetricType metric) {
+    return switch (metric) {
+      MetricType.heartRate => 'Heart Rate',
+      MetricType.hrv => 'HRV',
+      MetricType.steps => 'Steps',
+      MetricType.sleep => 'Sleep',
+    };
   }
 
-  String metricLabel(MetricType metric) {
-    switch (metric) {
-      case MetricType.heartRate:
-        return 'Heart Rate';
-      case MetricType.hrv:
-        return 'HRV';
-      case MetricType.steps:
-        return 'Steps';
-      case MetricType.sleep:
-        return 'Sleep';
+  Widget _buildChart(TrendsViewModel vm) {
+    if (vm.isLoading) {
+      return const Center(child: CircularProgressIndicator());
     }
-  }
 
-  Widget buildChart() {
-    switch (selectedMetric) {
-      case MetricType.heartRate:
-        return HeartRateChart(
-          timeframe: selectedTimeframe,
-          selectedDate: selectedDate,
-          spots: trendsService.getHeartRateSpots(
-            timeframe: selectedTimeframe,
-            selectedDate: selectedDate,
-          ),
-        );
-      case MetricType.hrv:
-        return HRVChart(
-          timeframe: selectedTimeframe,
-          selectedDate: selectedDate,
-          spots: trendsService.getHRVSpots(
-            timeframe: selectedTimeframe,
-            selectedDate: selectedDate,
-          ),
-        );
-      case MetricType.steps:
-        return StepsChart(
-          timeframe: selectedTimeframe,
-          selectedDate: selectedDate,
-          values: trendsService.getStepsValues(
-            timeframe: selectedTimeframe,
-            selectedDate: selectedDate,
-          ),
-        );
-      case MetricType.sleep:
-        return const Center(
-          child: Text('Sleep chart coming soon'),
-        );
+    if (vm.hasError) {
+      return const Center(child: Text('Failed to load data'));
     }
+
+    if (vm.spots.isEmpty &&
+        vm.selectedMetric != MetricType.steps &&
+        vm.selectedMetric != MetricType.sleep) {
+      return const Center(child: Text('No data for this period'));
+    }
+
+    return switch (vm.selectedMetric) {
+      MetricType.heartRate => HeartRateChart(
+        timeframe: vm.selectedTimeframe,
+        selectedDate: vm.selectedDate,
+        spots: vm.spots,
+      ),
+      MetricType.hrv => HRVChart(
+        timeframe: vm.selectedTimeframe,
+        selectedDate: vm.selectedDate,
+        spots: vm.spots,
+      ),
+      MetricType.steps => StepsChart(
+        timeframe: vm.selectedTimeframe,
+        selectedDate: vm.selectedDate,
+        values: const [],
+      ),
+      MetricType.sleep => const Center(child: Text('Sleep chart coming soon')),
+    };
   }
 
-  List<ZoneDuration> getZoneDurations() {
-    return trendsService.getZoneDurations(
-      timeframe: selectedTimeframe,
-      selectedDate: selectedDate,
-    );
-  }
-
-  Future<void> pickDate() async {
+  Future<void> _pickDate(BuildContext context, TrendsViewModel vm) async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate,
+      initialDate: vm.selectedDate,
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
-
     if (picked != null) {
-      setState(() {
-        selectedDate = picked;
-      });
+      vm.setDate(picked);
     }
-  }
-
-  void goToPreviousPeriod() {
-    setState(() {
-      switch (selectedTimeframe) {
-        case Timeframe.daily:
-          selectedDate = selectedDate.subtract(const Duration(days: 1));
-          break;
-        case Timeframe.weekly:
-          selectedDate = selectedDate.subtract(const Duration(days: 7));
-          break;
-        case Timeframe.monthly:
-          selectedDate = DateTime(
-            selectedDate.year,
-            selectedDate.month - 1,
-            selectedDate.day,
-          );
-          break;
-      }
-    });
-  }
-
-  void goToNextPeriod() {
-    if (!canMoveForward()) return;
-
-    setState(() {
-      switch (selectedTimeframe) {
-        case Timeframe.daily:
-          selectedDate = selectedDate.add(const Duration(days: 1));
-          break;
-        case Timeframe.weekly:
-          selectedDate = selectedDate.add(const Duration(days: 7));
-          break;
-        case Timeframe.monthly:
-          selectedDate = DateTime(
-            selectedDate.year,
-            selectedDate.month + 1,
-            selectedDate.day,
-          );
-          break;
-      }
-    });
-  }
-
-  bool canMoveForward() {
-    final now = DateTime.now();
-
-    switch (selectedTimeframe) {
-      case Timeframe.daily:
-        return _dateOnly(selectedDate).isBefore(_dateOnly(now));
-
-      case Timeframe.weekly:
-        final candidate = startOfWeek(selectedDate).add(const Duration(days: 7));
-        return !candidate.isAfter(startOfWeek(now));
-
-      case Timeframe.monthly:
-        final candidate = DateTime(selectedDate.year, selectedDate.month + 1, 1);
-        final currentMonth = DateTime(now.year, now.month, 1);
-        return !candidate.isAfter(currentMonth);
-    }
-  }
-
-  DateTime _dateOnly(DateTime date) {
-    return DateTime(date.year, date.month, date.day);
-  }
-
-  DateTime startOfWeek(DateTime date) {
-    return date.subtract(Duration(days: date.weekday - 1));
-  }
-
-  String formatSelectedPeriod() {
-    switch (selectedTimeframe) {
-      case Timeframe.daily:
-        return '${weekdayName(selectedDate.weekday)} ${selectedDate.day} ${monthName(selectedDate.month)} ${selectedDate.year}';
-
-      case Timeframe.weekly:
-        final weekStart = startOfWeek(selectedDate);
-        return 'Week of ${weekStart.day} ${monthName(weekStart.month)} ${weekStart.year}';
-
-      case Timeframe.monthly:
-        return '${monthName(selectedDate.month)} ${selectedDate.year}';
-    }
-  }
-
-  String weekdayName(int weekday) {
-    const days = [
-      '',
-      'Mon',
-      'Tue',
-      'Wed',
-      'Thu',
-      'Fri',
-      'Sat',
-      'Sun',
-    ];
-    return days[weekday];
-  }
-
-  String monthName(int month) {
-    const months = [
-      '',
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return months[month];
   }
 
   @override
   Widget build(BuildContext context) {
+    final vm = context.watch<TrendsViewModel>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("BetterTrack"),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
-            onPressed: () {
-              context.push('/settings');
-            },
+            onPressed: () => context.push('/settings'),
           ),
         ],
       ),
@@ -242,17 +91,17 @@ class _TrendsScreenState extends State<TrendsScreen> {
             children: [
               Text(
                 "Trends",
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppColors.onBackground
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(color: AppColors.onBackground),
               ),
               const SizedBox(height: 12),
               DateNavigationHeader(
-                label: formatSelectedPeriod(),
-                onPrevious: goToPreviousPeriod,
-                onNext: goToNextPeriod,
-                onPickDate: pickDate,
-                canGoForward: canMoveForward(),
+                label: vm.formattedPeriod,
+                onPrevious: vm.goToPreviousPeriod,
+                onNext: vm.goToNextPeriod,
+                onPickDate: () => _pickDate(context, vm),
+                canGoForward: vm.canMoveForward,
               ),
               const SizedBox(height: 12),
               Container(
@@ -268,38 +117,39 @@ class _TrendsScreenState extends State<TrendsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       DropdownButton<MetricType>(
-                        value: selectedMetric,
+                        value: vm.selectedMetric,
                         isExpanded: true,
-                        items: metrics.map(buildMetricItem).toList(),
+                        items: MetricType.values
+                            .map(
+                              (m) => DropdownMenuItem(
+                                value: m,
+                                child: Text(_metricLabel(m)),
+                              ),
+                            )
+                            .toList(),
                         onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              selectedMetric = value;
-                            });
-                          }
+                          if (value != null) vm.setMetric(value);
                         },
                       ),
                       const SizedBox(height: 16),
                       SegmentedButton<Timeframe>(
                         segments: const [
-                          ButtonSegment<Timeframe>(
+                          ButtonSegment(
                             value: Timeframe.daily,
                             label: Text('Daily'),
                           ),
-                          ButtonSegment<Timeframe>(
+                          ButtonSegment(
                             value: Timeframe.weekly,
                             label: Text('Weekly'),
                           ),
-                          ButtonSegment<Timeframe>(
+                          ButtonSegment(
                             value: Timeframe.monthly,
                             label: Text('Monthly'),
                           ),
                         ],
-                        selected: {selectedTimeframe},
-                        onSelectionChanged: (Set<Timeframe> newSelection) {
-                          setState(() {
-                            selectedTimeframe = newSelection.first;
-                          });
+                        selected: {vm.selectedTimeframe},
+                        onSelectionChanged: (newSelection) {
+                          vm.setTimeframe(newSelection.first);
                         },
                       ),
                       const SizedBox(height: 20),
@@ -312,7 +162,7 @@ class _TrendsScreenState extends State<TrendsScreen> {
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(12.0),
-                            child: buildChart(),
+                            child: _buildChart(vm),
                           ),
                         ),
                       ),
@@ -347,11 +197,19 @@ class _TrendsScreenState extends State<TrendsScreen> {
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(12.0),
-                            child: ZonesChart(
-                              timeframe: selectedTimeframe,
-                              selectedDate: selectedDate,
-                              zoneDurations: getZoneDurations(),
-                            ),
+                            child: vm.isLoading
+                                ? const Center(
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : vm.zoneDurations.isEmpty
+                                ? const Center(
+                                    child: Text('No zone data for this period'),
+                                  )
+                                : ZonesChart(
+                                    timeframe: vm.selectedTimeframe,
+                                    selectedDate: vm.selectedDate,
+                                    zoneDurations: vm.zoneDurations,
+                                  ),
                           ),
                         ),
                       ),

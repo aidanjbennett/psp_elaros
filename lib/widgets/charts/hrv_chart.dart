@@ -17,7 +17,16 @@ class HRVChart extends StatelessWidget {
   String xLabel(double value) {
     switch (timeframe) {
       case Timeframe.daily:
-        const labels = ['6am', '9am', '12pm', '3pm', '6pm', '9pm'];
+        const labels = [
+          '6am',
+          '9am',
+          '12pm',
+          '3pm',
+          '6pm',
+          '9pm',
+          '12am',
+          '3am',
+        ];
         return value.toInt() >= 0 && value.toInt() < labels.length
             ? labels[value.toInt()]
             : '';
@@ -77,7 +86,7 @@ class HRVChart extends StatelessWidget {
           rightTitles: const AxisTitles(
             sideTitles: SideTitles(showTitles: false),
           ),
-          leftTitles: AxisTitles(
+          leftTitles: const AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 32,
