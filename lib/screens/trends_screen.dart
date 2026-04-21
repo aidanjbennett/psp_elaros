@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:psp_elaros/models/trend_enums.dart';
-import 'package:psp_elaros/models/trend_model.dart';
+import 'package:psp_elaros/models/trend_view_model.dart';
 import 'package:psp_elaros/style/app_style.dart';
 import 'package:psp_elaros/widgets/charts/heart_rate_chart.dart';
 import 'package:psp_elaros/widgets/charts/hrv_chart.dart';

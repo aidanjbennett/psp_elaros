@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:psp_elaros/data/repositories/trends_repository.dart';
 import 'package:psp_elaros/models/trend_enums.dart';
-import 'package:psp_elaros/models/trend_model.dart';
+import 'package:psp_elaros/models/trend_view_model.dart';
 import 'package:psp_elaros/models/zone_duration.dart';
 
 class MockTrendsRepository extends Mock implements TrendsRepository {}

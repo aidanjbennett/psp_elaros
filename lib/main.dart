@@ -8,7 +8,8 @@ import 'package:psp_elaros/data/models/heart_metrics_model.dart';
 import 'package:psp_elaros/data/models/sleep_model.dart';
 import 'package:psp_elaros/data/repositories/health_repository.dart';
 import 'package:psp_elaros/data/repositories/trends_repository.dart';
-import 'package:psp_elaros/models/trend_model.dart';
+import 'package:psp_elaros/models/metrics_view_model.dart';
+import 'package:psp_elaros/models/trend_view_model.dart';
 import 'package:psp_elaros/router/app_router.dart';
 import 'package:psp_elaros/services/notification_service.dart';
 import 'package:psp_elaros/style/app_style.dart';
@@ -88,6 +89,9 @@ void main() async {
           create: (_) =>
               TrendsViewModel(repository: TrendsRepository(database: database))
                 ..load(),
+        ),
+        ChangeNotifierProvider<MetricsViewModel>(
+          create: (_) => MetricsViewModel()..loadMetrics(),
         ),
       ],
       child: const ElarosApp(),
