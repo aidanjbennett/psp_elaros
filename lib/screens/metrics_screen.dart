@@ -1,322 +1,233 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:psp_elaros/data/local/database.dart';
-import 'package:psp_elaros/data/local/db_instance.dart';
-import 'package:psp_elaros/services/hrv_service.dart';
 import 'package:psp_elaros/style/app_style.dart';
+import 'package:psp_elaros/models/metrics_view_model.dart';
 
-late final AppDatabase db;
-
-class MetricsScreen extends StatefulWidget {
+class MetricsScreen extends StatelessWidget {
   const MetricsScreen({super.key});
 
   @override
-  State<MetricsScreen> createState() => _MetricsScreenState();
-}
-
-class _MetricsScreenState extends State<MetricsScreen> {
-  final HrvService _hrvService = HrvService();
-
-  String _hrv = '-- ms';
-  bool _loading = true;
-  bool _goodHrvStatus = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // db = widget.database;
-  }
-
-  Future<void> _loadMetrics() async {
-    final hrv = await _hrvService.getDailyHrv();
-    if (!mounted) return;
-    setState(() {
-      _hrv = hrv;
-
-      if (hrv != '-- ms') {
-        final hrvValue = double.tryParse(
-          hrv.replaceAll(RegExp(r'[^0-9.]'), ''),
-        );
-        _goodHrvStatus = hrvValue != null && hrvValue >= 35 && hrvValue <= 99;
-      }
-
-      _loading = false;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Your Dashboard"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              context.push('/settings');
-            },
+    return Consumer<MetricsViewModel>(
+      builder: (context, model, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text("BetterTrack"),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: model.isLoading ? null : () => model.loadMetrics(),
+              ),
+              IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () => context.push('/settings'),
+              ),
+            ],
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Status Overview",
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: AppColors.onBackground,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // HRV Status Card
+                _buildHrvCard(model),
+
+                const SizedBox(height: 16),
+
+                // Other Metrics Container
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(16.0),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildMetricTile(
+                        icon: Icons.bed,
+                        color: Colors.purple,
+                        label: "Sleep",
+                        status: "All good",
+                      ),
+                      const Divider(height: 1, indent: 16, endIndent: 16),
+                      _buildMetricTile(
+                        icon: Icons.location_searching,
+                        color: Colors.orange,
+                        label: "Goals",
+                        status: "On track",
+                      ),
+                      const Divider(height: 1, indent: 16, endIndent: 16),
+                      _buildMetricTile(
+                        icon: Icons.directions_walk,
+                        color: Colors.lightBlue,
+                        label: "Steps",
+                        status: "On track",
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildHrvCard(MetricsViewModel model) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const CircleAvatar(
+                radius: 24,
+                backgroundColor: Colors.pinkAccent,
+                child: Icon(Icons.monitor_heart, color: Colors.white),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                "Heart Rate",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              const Spacer(),
+              const Text(
+                "Status",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
+              const SizedBox(width: 8),
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: model.isLoading
+                    ? Colors.grey[300]
+                    : (model.isHrvHealthy ? Colors.green : Colors.redAccent),
+                child: Icon(
+                  model.isLoading
+                      ? Icons.hourglass_empty
+                      : (model.isHrvHealthy
+                            ? Icons.check
+                            : Icons.priority_high),
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              const Text(
+                "HRV:",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(width: 12),
+              if (model.isLoading)
+                const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              else
+                Text(
+                  model.hrv,
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              const SizedBox(width: 12),
+              if (!model.isLoading)
+                Text(
+                  model.isHrvHealthy ? 'Healthy' : 'Low',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: model.isHrvHealthy ? Colors.green : Colors.red,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            model.isLoading ? "Syncing data..." : "Updated just now",
+            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Status Overview",
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.onBackground
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundColor: Colors.pinkAccent,
-                        child: Icon(Icons.monitor_heart, color: Colors.white),
-                      ),
-                      SizedBox(width: 12),
-                      const Text(
-                        "Heart Rate",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const Spacer(),
-                      const Text(
-                        "Status",
-                        style: TextStyle(
-                          fontSize: 24,
-                          color: Colors.black,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      SizedBox(width: 12),
-                      CircleAvatar(
-                        radius: 18,
-                        backgroundColor: Colors.deepOrangeAccent,
-                        child: Icon(
-                          Icons.error_outline,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  // Row(
-                  //   children: [
-                  //     const Text(
-                  //       "HRV:",
-                  //       style: TextStyle(
-                  //         fontSize: 22,
-                  //         fontWeight: FontWeight.w600,
-                  //         color: Colors.black87,
-                  //       ),
-                  //     ),
-                  //     const SizedBox(width: 5),
-                  //     StreamBuilder<List<HrvData>>(
-                  //       stream:
-                  //           (db.select(db.hrv)..where(
-                  //                 (tbl) => tbl.timestamp.isBiggerOrEqualValue(
-                  //                   DateTime.now().subtract(
-                  //                     const Duration(days: 1),
-                  //                   ),
-                  //                 ),
-                  //               ))
-                  //               .watch(),
-                  //       builder: (context, snapshot) {
-                  //         if (!snapshot.hasData) {
-                  //           return const SizedBox(
-                  //             width: 20,
-                  //             height: 20,
-                  //             child: CircularProgressIndicator(strokeWidth: 2),
-                  //           );
-                  //         }
+    );
+  }
 
-                  //         final data = snapshot.data!;
-
-                  //         if (data.isEmpty) {
-                  //           return const Text(
-                  //             '-- ms',
-                  //             style: TextStyle(
-                  //               fontSize: 26,
-                  //               fontWeight: FontWeight.w600,
-                  //             ),
-                  //           );
-                  //         }
-
-                  //         final avg =
-                  //             data.map((e) => e.hrv).reduce((a, b) => a + b) ~/
-                  //             data.length;
-
-                  //         return Text(
-                  //           '$avg ms',
-                  //           style: const TextStyle(
-                  //             fontSize: 26,
-                  //             fontWeight: FontWeight.w600,
-                  //             color: Colors.black87,
-                  //           ),
-                  //         );
-                  //       },
-                  //     ),
-                  //     const SizedBox(width: 10),
-                  //     Text(
-                  //       _goodHrvStatus ? 'Good HRV' : 'Bad HRV',
-                  //       style: TextStyle(
-                  //         fontSize: 18,
-                  //         color: _goodHrvStatus ? Colors.green : Colors.red,
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    "Update on the user here",
-                    style: TextStyle(fontSize: 16, color: Colors.black87),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(16.0),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: const [
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundColor: Colors.purple,
-                        child: Icon(Icons.bed, color: Colors.white),
-                      ),
-                      SizedBox(width: 12),
-                      Text(
-                        "Sleep",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      Spacer(),
-                      Text(
-                        'All good',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      CircleAvatar(
-                        radius: 18,
-                        backgroundColor: Colors.green,
-                        child: Icon(Icons.check, color: Colors.white, size: 24),
-                      ),
-                      Icon(Icons.chevron_right),
-                    ],
-                  ),
-                  const Divider(thickness: 2),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: const [
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundColor: Colors.yellow,
-                        child: Icon(
-                          Icons.location_searching,
-                          color: Colors.white,
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Text(
-                        "Goals",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      Spacer(),
-                      Text(
-                        'On track',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      CircleAvatar(
-                        radius: 18,
-                        backgroundColor: Colors.green,
-                        child: Icon(Icons.check, color: Colors.white, size: 24),
-                      ),
-                      Icon(Icons.chevron_right),
-                    ],
-                  ),
-                  const Divider(thickness: 2),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: const [
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundColor: Colors.lightBlue,
-                        child: Icon(Icons.directions_walk, color: Colors.white),
-                      ),
-                      SizedBox(width: 12),
-                      Text(
-                        "Steps",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      Spacer(),
-                      Text(
-                        'On track',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      CircleAvatar(
-                        radius: 18,
-                        backgroundColor: Colors.green,
-                        child: Icon(Icons.check, color: Colors.white, size: 24),
-                      ),
-                      Icon(Icons.chevron_right),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-          ],
+  Widget _buildMetricTile({
+    required IconData icon,
+    required Color color,
+    required String label,
+    required String status,
+  }) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      leading: CircleAvatar(
+        radius: 24,
+        backgroundColor: color,
+        child: Icon(icon, color: Colors.white),
+      ),
+      title: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
         ),
       ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            status,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(width: 12),
+          const CircleAvatar(
+            radius: 14,
+            backgroundColor: Colors.green,
+            child: Icon(Icons.check, color: Colors.white, size: 16),
+          ),
+          const SizedBox(width: 4),
+          const Icon(Icons.chevron_right, color: Colors.grey),
+        ],
+      ),
+      onTap: () {
+        // Navigate to detail view
+      },
     );
   }
 }
